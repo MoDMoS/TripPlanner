@@ -14,6 +14,21 @@ npm run start:dev
 
 The API listens on `http://127.0.0.1:3003` by default. Check it with `GET /health`.
 
+The API uses the Portal PostgreSQL cluster on host port `5433`. Create its
+database once before applying migrations:
+
+```sql
+CREATE DATABASE tripplanner OWNER portal;
+```
+
+Copy `api/.env.example` to `api/.env`, keep `AUTH_SECRET` identical to the
+Portal value, set the real database password in `DATABASE_URL`, then run:
+
+```bash
+cd api
+npx prisma migrate deploy
+```
+
 Start the web app:
 
 ```bash
