@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Patch,
   Post,
@@ -22,6 +23,11 @@ import { ItineraryService } from './itinerary.service';
 @Controller('trips/:tripId')
 export class ItineraryController {
   constructor(private readonly itinerary: ItineraryService) {}
+
+  @Get('preview')
+  preview(@CurrentUser() user: AuthUser, @Param('tripId') tripId: string) {
+    return this.itinerary.preview(user, tripId);
+  }
 
   @Post('days')
   createDay(

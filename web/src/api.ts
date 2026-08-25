@@ -226,4 +226,67 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ url }),
     }),
+  getPreview: (tripId: string) =>
+    request<{
+      trip: {
+        id: string;
+        name: string;
+        destination?: string | null;
+        placeCount: number;
+        dayCount: number;
+      };
+      totals: {
+        totalTravelSec: number;
+        totalActivitySec: number;
+        totalSec: number;
+      };
+      warnings: string[];
+      days: Array<{
+        id: string;
+        dayNumber: number;
+        title?: string | null;
+        startTime: string;
+        startLabel?: string | null;
+        transportMode: string;
+        schedule: {
+          stops: Array<{
+            placeId: string;
+            name: string;
+            arrive: string;
+            depart: string;
+            stayMinutes: number;
+          }>;
+          endTime: string;
+        } | null;
+        places: Array<{
+          id: string;
+          name: string;
+          address?: string | null;
+          lat: number;
+          lng: number;
+          source: string;
+        }>;
+      }>;
+    }>(`/trips/${tripId}/preview`),
+  exportDocx: async (tripId: string, mapPngBase64?: string) => {
+    const response = await fetch(`/trip-api/trips/${tripId}/export/docx`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mapPngBase64 }),
+    });
+    if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as {
+        message?: string;
+      };
+      throw new Error(body.message || 'Export failed');
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'trip.docx';
+    a.click();
+    URL.revokeObjectURL(url);
+  },
 };

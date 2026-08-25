@@ -462,6 +462,91 @@ export class ItineraryService {
     };
   }
 
+  async preview(user: AuthUser, tripId: string) {
+    const trip = await this.trips.get(user, tripId);
+    const days: Array<{
+      id: string;
+      dayNumber: number;
+      title: string | null;
+      startTime: string;
+      startLabel: string | null;
+      transportMode: string;
+      schedule: ReturnType<typeof buildDaySchedule> | null;
+      places: Array<{
+        id: string;
+        name: string;
+        address: string | null;
+        lat: number;
+        lng: number;
+        source: string;
+      }>;
+    }> = [];
+    let totalTravelSec = 0;
+    let totalActivitySec = 0;
+    const warnings: string[] = [];
+
+    for (const day of trip.days ?? []) {
+      const ordered = day.places ?? [];
+      const durations = ordered.map((row) => {
+        const leg = (day.legs ?? []).find((l) => l.toPlaceId === row.placeId);
+        return leg?.durationSec ?? 0;
+      });
+      const startTime = day.startTime || '09:00';
+      const schedule = ordered.length
+        ? buildDaySchedule({
+            startTime,
+            places: ordered.map((row) => ({
+              placeId: row.placeId,
+              name: row.place.name,
+              stayMinutes: row.stayMinutes,
+            })),
+            legsDurationSec: durations,
+          })
+        : null;
+      if (schedule) {
+        totalTravelSec += schedule.totalTravelSec;
+        totalActivitySec += schedule.totalActivitySec;
+      }
+      for (const leg of day.legs ?? []) {
+        if (leg.warning) warnings.push(`Day ${day.dayNumber}: ${leg.warning}`);
+      }
+      days.push({
+        id: day.id,
+        dayNumber: day.dayNumber,
+        title: day.title,
+        startTime,
+        startLabel: day.startLabel,
+        transportMode: day.transportMode,
+        schedule,
+        places: ordered.map((row) => ({
+          id: row.place.id,
+          name: row.place.name,
+          address: row.place.address,
+          lat: row.place.lat,
+          lng: row.place.lng,
+          source: row.place.source,
+        })),
+      });
+    }
+
+    return {
+      trip: {
+        id: trip.id,
+        name: trip.name,
+        destination: trip.destination,
+        placeCount: trip.places?.length ?? 0,
+        dayCount: days.length,
+      },
+      totals: {
+        totalTravelSec,
+        totalActivitySec,
+        totalSec: totalTravelSec + totalActivitySec,
+      },
+      warnings,
+      days,
+    };
+  }
+
   private async loadDayWithPlaces(
     user: AuthUser,
     tripId: string,
