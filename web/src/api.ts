@@ -40,12 +40,29 @@ export type TripPlace = {
   category?: string | null;
 };
 
+export type TripDayPlace = {
+  id: string;
+  placeId: string;
+  sortOrder: number;
+  stayMinutes: number;
+  place: TripPlace;
+};
+
+export type TripDay = {
+  id: string;
+  dayNumber: number;
+  title?: string | null;
+  transportMode: string;
+  places: TripDayPlace[];
+};
+
 export type Trip = {
   id: string;
   name: string;
   destination?: string | null;
   wizardStep: number;
   places: TripPlace[];
+  days?: TripDay[];
 };
 
 export type SearchHit = {
@@ -91,6 +108,29 @@ export const api = {
     }),
   removePlace: (tripId: string, placeId: string) =>
     request<{ ok: true }>(`/trips/${tripId}/places/${placeId}`, {
+      method: 'DELETE',
+    }),
+  createDay: (tripId: string, title?: string) =>
+    request<TripDay>(`/trips/${tripId}/days`, {
+      method: 'POST',
+      body: JSON.stringify({ title }),
+    }),
+  deleteDay: (tripId: string, dayId: string) =>
+    request<{ ok: true }>(`/trips/${tripId}/days/${dayId}`, {
+      method: 'DELETE',
+    }),
+  setDayOrder: (tripId: string, dayId: string, placeIds: string[]) =>
+    request<TripDay>(`/trips/${tripId}/days/${dayId}/order`, {
+      method: 'PATCH',
+      body: JSON.stringify({ placeIds }),
+    }),
+  assignPlaceToDay: (tripId: string, dayId: string, placeId: string) =>
+    request(`/trips/${tripId}/days/${dayId}/places`, {
+      method: 'POST',
+      body: JSON.stringify({ placeId }),
+    }),
+  removePlaceFromDay: (tripId: string, dayId: string, placeId: string) =>
+    request<{ ok: true }>(`/trips/${tripId}/days/${dayId}/places/${placeId}`, {
       method: 'DELETE',
     }),
   searchPlaces: (body: { query: string; lat?: number; lng?: number }) =>

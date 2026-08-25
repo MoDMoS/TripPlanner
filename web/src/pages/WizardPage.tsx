@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, type Trip } from '../api';
 import { useAuth } from '../auth';
+import { StepDays } from '../wizard/StepDays';
 import { StepPlaces } from '../wizard/StepPlaces';
 import { WizardShell } from '../wizard/WizardShell';
 
@@ -45,6 +46,20 @@ export function WizardPage() {
               .catch((err: Error) => setError(err.message));
           }}
         />
+      ) : step === 2 ? (
+        <StepDays
+          trip={trip}
+          onChanged={refresh}
+          onBack={() =>
+            void api.updateTrip(trip.id, { wizardStep: 1 }).then(refresh)
+          }
+          onContinue={() => {
+            void api
+              .updateTrip(trip.id, { wizardStep: 3 })
+              .then(refresh)
+              .catch((err: Error) => setError(err.message));
+          }}
+        />
       ) : (
         <div className="rounded-xl border border-slate-700 p-6 text-slate-300">
           <p>Step {step} UI comes in later milestones.</p>
@@ -52,10 +67,10 @@ export function WizardPage() {
             type="button"
             className="mt-4 text-sky-400"
             onClick={() =>
-              void api.updateTrip(trip.id, { wizardStep: 1 }).then(refresh)
+              void api.updateTrip(trip.id, { wizardStep: 2 }).then(refresh)
             }
           >
-            Back to places
+            Back to days
           </button>
           {error ? <p className="mt-2 text-rose-400">{error}</p> : null}
         </div>
