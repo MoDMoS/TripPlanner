@@ -5,6 +5,7 @@ import { HealthModule } from './health/health.module';
 import { ItineraryModule } from './itinerary/itinerary.module';
 import { PlacesModule } from './places/places.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { RoutingModule } from './routing/routing.module';
 import { TripsModule } from './trips/trips.module';
 import { UsersModule } from './users/users.module';
 
@@ -18,6 +19,7 @@ import { UsersModule } from './users/users.module';
     PlacesModule,
     TripsModule,
     ItineraryModule,
+    RoutingModule,
   ],
 })
 export class AppModule {}
