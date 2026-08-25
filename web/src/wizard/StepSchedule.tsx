@@ -136,7 +136,7 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
   }
 
   if (!day) {
-    return <p className="text-slate-400">สร้างวันและจัดสถานที่ก่อน</p>;
+    return <p className="text-violet-600/80">สร้างวันและจัดสถานที่ก่อน</p>;
   }
 
   return (
@@ -144,7 +144,7 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          className="rounded-lg border border-slate-600 px-3 py-2 text-sm"
+          className="rounded-lg border border-violet-200 px-3 py-2 text-sm"
           onClick={onBack}
         >
           ← Days
@@ -152,7 +152,7 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
         <button
           type="button"
           disabled={busy}
-          className="rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-violet-950 disabled:opacity-40"
+          className="rounded-lg bg-violet-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
           onClick={onContinue}
         >
           Continue to preview →
@@ -165,7 +165,7 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
             key={d.id}
             type="button"
             className={`rounded-full px-3 py-1 text-sm ${
-              d.id === day.id ? 'bg-violet-500 text-violet-950' : 'bg-violet-900/80'
+              d.id === day.id ? 'bg-violet-600 text-white' : 'bg-violet-100 text-violet-800'
             }`}
             onClick={() => setDayId(d.id)}
           >
@@ -174,11 +174,11 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
         ))}
       </div>
 
-      <section className="grid gap-4 rounded-xl border border-slate-700 bg-slate-900/70 p-4 lg:grid-cols-2">
+      <section className="grid gap-4 rounded-xl border border-violet-200 bg-white/85 p-4 lg:grid-cols-2">
         <label className="text-sm">
           Start time
           <input
-            className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2"
+            className="mt-1 w-full rounded-lg border border-violet-200 bg-white px-3 py-2"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
           />
@@ -186,7 +186,7 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
         <label className="text-sm">
           Start label
           <input
-            className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2"
+            className="mt-1 w-full rounded-lg border border-violet-200 bg-white px-3 py-2"
             value={startLabel}
             onChange={(e) => setStartLabel(e.target.value)}
             placeholder="Hotel"
@@ -195,7 +195,7 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
         <label className="text-sm lg:col-span-2">
           Transport mode
           <select
-            className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2"
+            className="mt-1 w-full rounded-lg border border-violet-200 bg-white px-3 py-2"
             value={mode}
             onChange={(e) => setMode(e.target.value as Mode)}
           >
@@ -207,14 +207,14 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
         </label>
       </section>
 
-      <section className="space-y-3 rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+      <section className="space-y-3 rounded-xl border border-violet-200 bg-white/85 p-4">
         {day.places.map((row, index) => (
           <div
             key={row.placeId}
-            className="grid gap-2 rounded-lg border border-slate-700 p-3 md:grid-cols-3"
+            className="grid gap-2 rounded-lg border border-violet-200 p-3 md:grid-cols-3"
           >
             <div>
-              <div className="text-xs text-slate-500">Stop {index + 1}</div>
+              <div className="text-xs text-violet-500">Stop {index + 1}</div>
               <div className="font-medium">{row.place.name}</div>
             </div>
             <label className="text-sm">
@@ -222,7 +222,7 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
               <input
                 type="number"
                 min={0}
-                className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2"
+                className="mt-1 w-full rounded-lg border border-violet-200 bg-white px-3 py-2"
                 value={stays[row.placeId] ?? row.stayMinutes}
                 onChange={(e) =>
                   setStays((s) => ({
@@ -240,7 +240,7 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
               <input
                 type="number"
                 min={0}
-                className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2"
+                className="mt-1 w-full rounded-lg border border-violet-200 bg-white px-3 py-2"
                 value={legMins[row.placeId] ?? 0}
                 onChange={(e) => {
                   setLegMins((s) => ({
@@ -260,7 +260,7 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
           <button
             type="button"
             disabled={busy}
-            className="rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-violet-950"
+            className="rounded-lg bg-violet-600 px-3 py-2 text-sm font-semibold text-white"
             onClick={() => void calculate(day)}
           >
             Calculate travel times
@@ -269,7 +269,7 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
         <button
           type="button"
           disabled={busy}
-          className="rounded-lg border border-slate-500 px-3 py-2 text-sm"
+          className="rounded-lg border border-violet-300 px-3 py-2 text-sm"
           onClick={() => void save(false)}
         >
           Save schedule
@@ -293,7 +293,7 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
           </label>
           <button
             type="button"
-            className="mt-2 text-violet-300"
+            className="mt-2 text-violet-700"
             disabled={!ack || busy}
             onClick={() => void save(true)}
           >
@@ -303,13 +303,13 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
       ) : null}
 
       {timeline ? (
-        <pre className="overflow-auto rounded-lg border border-slate-700 bg-slate-950 p-3 text-xs text-slate-300">
+        <pre className="overflow-auto rounded-lg border border-violet-200 bg-white p-3 text-xs text-violet-800">
           {timeline}
         </pre>
       ) : null}
       {error ? <p className="text-sm text-rose-400">{error}</p> : null}
       {day.legs?.length ? (
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-violet-500">
           Stored legs:{' '}
           {day.legs
             .map((l) => `${l.toPlaceId}:${minutesLabel(l.durationSec)}`)

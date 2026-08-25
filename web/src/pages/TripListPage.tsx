@@ -20,7 +20,7 @@ export function TripListPage() {
   }, [hasTripAccess]);
 
   if (loading) {
-    return <p className="p-8 text-violet-200/70">Loading…</p>;
+    return <p className="p-8 text-violet-700/70">Loading…</p>;
   }
   if (!user) {
     const next = encodeURIComponent(
@@ -28,8 +28,8 @@ export function TripListPage() {
     );
     return (
       <main className="p-8">
-        <p className="text-violet-100/80">กรุณาเข้าสู่ระบบที่ Portal</p>
-        <a className="text-violet-300" href={`/login?next=${next}`}>
+        <p className="text-violet-900/80">กรุณาเข้าสู่ระบบที่ Portal</p>
+        <a className="text-violet-700" href={`/login?next=${next}`}>
           ไปหน้า Login
         </a>
       </main>
@@ -37,7 +37,7 @@ export function TripListPage() {
   }
   if (!hasTripAccess) {
     return (
-      <main className="p-8 text-violet-100/80">
+      <main className="p-8 text-violet-900/80">
         ไม่มีสิทธิ์ `service:trip-planner`
       </main>
     );
@@ -46,8 +46,8 @@ export function TripListPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-violet-50">Your trips</h1>
-        <p className="text-sm text-violet-300/70">{user.name}</p>
+        <h1 className="text-3xl font-bold text-violet-950">Your trips</h1>
+        <p className="text-sm text-violet-700/70">{user.name}</p>
       </div>
 
       <form
@@ -65,30 +65,30 @@ export function TripListPage() {
         }}
       >
         <input
-          className="flex-1 rounded-lg border border-violet-500/30 bg-violet-950/50 px-3 py-2 text-violet-50 placeholder:text-violet-300/40"
+          className="flex-1 rounded-lg border border-violet-200 bg-white px-3 py-2 text-violet-950 placeholder:text-violet-400/60"
           placeholder="Trip name"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <button
           type="submit"
-          className="rounded-lg bg-violet-500 px-4 py-2 font-semibold text-violet-950 hover:bg-violet-400"
+          className="rounded-lg bg-violet-600 px-4 py-2 font-semibold text-white hover:bg-violet-500"
         >
           New trip
         </button>
       </form>
 
-      {error ? <p className="mb-4 text-rose-400">{error}</p> : null}
+      {error ? <p className="mb-4 text-rose-600">{error}</p> : null}
 
       <ul className="space-y-3">
         {trips.map((trip) => (
           <li key={trip.id}>
             <Link
               to={`/trips/${trip.id}`}
-              className="block rounded-xl border border-violet-500/25 bg-violet-950/40 p-4 hover:border-violet-400/50"
+              className="block rounded-xl border border-violet-200 bg-white/80 p-4 shadow-sm hover:border-violet-400"
             >
-              <div className="font-semibold text-violet-50">{trip.name}</div>
-              <div className="text-xs text-violet-300/70">
+              <div className="font-semibold text-violet-950">{trip.name}</div>
+              <div className="text-xs text-violet-700/70">
                 {trip.places?.length ?? 0} places · step {trip.wizardStep}
               </div>
             </Link>

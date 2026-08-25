@@ -23,7 +23,7 @@ export function StepPreview({ trip, onBack, onContinue }: Props) {
   }, [trip.id]);
 
   if (!preview) {
-    return <p className="text-slate-400">{error ?? 'Loading preview…'}</p>;
+    return <p className="text-violet-600/80">{error ?? 'Loading preview…'}</p>;
   }
 
   const day = preview.days[dayIndex];
@@ -33,27 +33,27 @@ export function StepPreview({ trip, onBack, onContinue }: Props) {
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          className="rounded-lg border border-slate-600 px-3 py-2 text-sm"
+          className="rounded-lg border border-violet-200 px-3 py-2 text-sm"
           onClick={onBack}
         >
           ← Schedule
         </button>
         <button
           type="button"
-          className="rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-violet-950"
+          className="rounded-lg bg-violet-600 px-3 py-2 text-sm font-semibold text-white"
           onClick={onContinue}
         >
           Continue to export →
         </button>
       </div>
 
-      <section className="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+      <section className="rounded-xl border border-violet-200 bg-white/85 p-4">
         <h2 className="text-xl font-semibold">{preview.trip.name}</h2>
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-violet-600/80">
           {preview.trip.destination || 'No destination set'} ·{' '}
           {preview.trip.dayCount} days · {preview.trip.placeCount} places
         </p>
-        <p className="mt-2 text-sm text-slate-300">
+        <p className="mt-2 text-sm text-violet-800">
           Travel {Math.round(preview.totals.totalTravelSec / 60)} min · Activities{' '}
           {Math.round(preview.totals.totalActivitySec / 60)} min
         </p>
@@ -72,7 +72,7 @@ export function StepPreview({ trip, onBack, onContinue }: Props) {
             key={d.id}
             type="button"
             className={`rounded-full px-3 py-1 text-sm ${
-              i === dayIndex ? 'bg-violet-500 text-violet-950' : 'bg-violet-900/80'
+              i === dayIndex ? 'bg-violet-600 text-white' : 'bg-violet-100 text-violet-800'
             }`}
             onClick={() => setDayIndex(i)}
           >
@@ -83,19 +83,19 @@ export function StepPreview({ trip, onBack, onContinue }: Props) {
 
       {day ? (
         <div className="grid gap-4 lg:grid-cols-2">
-          <section className="rounded-xl border border-slate-700 bg-slate-900/70 p-4 text-sm">
+          <section className="rounded-xl border border-violet-200 bg-white/85 p-4 text-sm">
             <h3 className="font-semibold">
               Day {day.dayNumber}
               {day.title ? ` — ${day.title}` : ''}
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-violet-600/80">
               Start {day.startTime}
               {day.startLabel ? ` · ${day.startLabel}` : ''} · {day.transportMode}
             </p>
             <ol className="mt-3 space-y-2">
               {day.schedule?.stops.map((stop) => (
                 <li key={`${stop.placeId}-${stop.arrive}`}>
-                  <span className="text-slate-400">
+                  <span className="text-violet-600/80">
                     {stop.arrive}–{stop.depart}
                   </span>{' '}
                   {stop.name}
@@ -104,7 +104,7 @@ export function StepPreview({ trip, onBack, onContinue }: Props) {
                 day.places.map((p) => <li key={p.id}>{p.name}</li>)}
             </ol>
           </section>
-          <section className="min-h-[280px] overflow-hidden rounded-xl border border-slate-700">
+          <section className="min-h-[280px] overflow-hidden rounded-xl border border-violet-200">
             <TripMap
               places={day.places.map((p) => ({
                 id: p.id,

@@ -26,7 +26,7 @@ export function WizardPage() {
   }, [hasTripAccess, id, refresh]);
 
   if (loading || !trip) {
-    return <p className="p-8 text-violet-300/80">{error ?? 'Loading trip…'}</p>;
+    return <p className="p-8 text-violet-700/80">{error ?? 'Loading trip…'}</p>;
   }
 
   const step = trip.wizardStep || 1;
@@ -34,7 +34,7 @@ export function WizardPage() {
   return (
     <WizardShell step={step} title={trip.name}>
       <div className="mb-4">
-        <Link to="/" className="text-sm text-violet-400">
+        <Link to="/" className="text-sm text-violet-700">
           ← All trips
         </Link>
       </div>

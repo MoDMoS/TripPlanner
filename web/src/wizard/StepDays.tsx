@@ -42,7 +42,7 @@ function SortableItem({
     <li
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+      className="flex items-center justify-between rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm"
     >
       <button type="button" className="flex-1 text-left" {...attributes} {...listeners}>
         {label}
@@ -111,7 +111,7 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          className="rounded-lg border border-slate-600 px-3 py-2 text-sm"
+          className="rounded-lg border border-violet-200 px-3 py-2 text-sm"
           onClick={onBack}
         >
           ← Places
@@ -119,7 +119,7 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
         <button
           type="button"
           disabled={busy}
-          className="rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-violet-950"
+          className="rounded-lg bg-violet-600 px-3 py-2 text-sm font-semibold text-white"
           onClick={() => void addDay()}
         >
           + Add day
@@ -127,7 +127,7 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
         <button
           type="button"
           disabled={!canContinue}
-          className="rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-violet-950 disabled:opacity-40"
+          className="rounded-lg bg-violet-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
           onClick={onContinue}
         >
           Continue to schedule →
@@ -136,20 +136,20 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
       {error ? <p className="text-sm text-rose-400">{error}</p> : null}
 
       <div className="grid gap-4 lg:grid-cols-[240px_repeat(auto-fit,minmax(220px,1fr))]">
-        <section className="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+        <section className="rounded-xl border border-violet-200 bg-white/85 p-4">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-violet-600/80">
             Unassigned
           </h2>
           <ul className="mt-3 space-y-2 text-sm">
             {unassigned.map((place) => (
-              <li key={place.id} className="rounded-lg border border-slate-700 p-2">
+              <li key={place.id} className="rounded-lg border border-violet-200 p-2">
                 <div className="font-medium">{place.name}</div>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {(trip.days ?? []).map((day) => (
                     <button
                       key={day.id}
                       type="button"
-                      className="rounded bg-violet-900/80 px-2 py-1 text-xs text-violet-300"
+                      className="rounded bg-violet-100 px-2 py-1 text-xs text-violet-700"
                       onClick={() =>
                         void api
                           .assignPlaceToDay(trip.id, day.id, place.id)
@@ -164,7 +164,7 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
               </li>
             ))}
             {!unassigned.length ? (
-              <li className="text-xs text-slate-500">All places assigned</li>
+              <li className="text-xs text-violet-500">All places assigned</li>
             ) : null}
           </ul>
         </section>
@@ -172,7 +172,7 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
         {(trip.days ?? []).map((day) => (
           <section
             key={day.id}
-            className="rounded-xl border border-slate-700 bg-slate-900/70 p-4"
+            className="rounded-xl border border-violet-200 bg-white/85 p-4"
           >
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-semibold">
@@ -203,7 +203,7 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
                 <ol className="space-y-2">
                   {day.places.map((row, index) => (
                     <div key={row.placeId} className="flex items-center gap-2">
-                      <span className="w-5 text-xs text-slate-500">{index + 1}.</span>
+                      <span className="w-5 text-xs text-violet-500">{index + 1}.</span>
                       <div className="flex-1">
                         <SortableItem
                           id={row.placeId}

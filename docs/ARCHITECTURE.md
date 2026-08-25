@@ -6,7 +6,7 @@ TripPlanner is a MoDMoS sibling application composed of:
 
 - `api/`: NestJS 11 API, default port `3003`
 - `web/`: Vite 7, React 19, React Router 7, and Tailwind CSS 4, development port `5175`
-- UI chrome: Gold-style **TopBar + collapsible SideBar** (`web/src/shell/`) with **purple dark** theme
+- UI chrome: Gold-style **TopBar + collapsible SideBar** (`web/src/shell/`) with **soft purple light** theme
 
 ## HTTP routing
 

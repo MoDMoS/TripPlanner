@@ -1,15 +1,16 @@
-/* Trip Planner shell — purple dark, Gold-style TopBar + SideBar */
+/* Trip Planner shell — soft purple light theme, Gold-style TopBar + SideBar */
 
 :root {
-  --bg: #120f1a;
-  --bg-elevated: #1a1526;
-  --bg-soft: #241c35;
-  --line: #3d3354;
-  --text: #f3eefc;
-  --muted: #a89bc0;
-  --accent: #a78bfa;
-  --accent-deep: #7c3aed;
-  --danger: #f07178;
+  --bg: #f3eefb;
+  --bg-elevated: #ffffff;
+  --bg-soft: #ebe3f8;
+  --line: #d5c8eb;
+  --text: #2a2140;
+  --muted: #6e5f8a;
+  --accent: #7c5cbf;
+  --accent-deep: #6541a8;
+  --danger: #c44b55;
+  --on-accent: #faf7ff;
 }
 
 .app-shell {
@@ -31,8 +32,8 @@
   flex-direction: column;
   height: 100vh;
   flex-shrink: 0;
-  border-right: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
-  background: color-mix(in srgb, var(--bg-elevated) 92%, black);
+  border-right: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg-elevated) 88%, var(--bg-soft));
   backdrop-filter: blur(12px);
   transition: width 200ms ease;
 }
@@ -53,7 +54,7 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0 0.5rem;
-  border-bottom: 1px solid rgba(167, 139, 250, 0.22);
+  border-bottom: 1px solid var(--line);
 }
 
 .app-sidebar-head.open {
@@ -84,7 +85,7 @@
 
 .app-sidebar-toggle:hover {
   color: var(--text);
-  background: rgba(243, 238, 252, 0.06);
+  background: rgba(124, 92, 191, 0.08);
 }
 
 .app-sidebar-nav {
@@ -119,11 +120,11 @@
 
 .app-sidebar-link:hover {
   color: var(--text);
-  background: rgba(167, 139, 250, 0.1);
+  background: rgba(124, 92, 191, 0.08);
 }
 
 .app-sidebar-link.active {
-  color: #1a1028;
+  color: var(--on-accent);
   background: linear-gradient(135deg, var(--accent), var(--accent-deep));
 }
 
@@ -159,14 +160,14 @@
 
 /* Topbar */
 .topbar {
-  --panel-border: rgba(167, 139, 250, 0.22);
+  --panel-border: var(--line);
 
   position: sticky;
   top: 0;
   z-index: 30;
   width: 100%;
   border-bottom: 1px solid var(--panel-border);
-  background: rgba(26, 21, 38, 0.92);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(12px);
 }
 
@@ -200,7 +201,7 @@
   height: 2.75rem;
   border-radius: 0.75rem;
   object-fit: cover;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 4px 14px rgba(80, 50, 140, 0.12);
   flex-shrink: 0;
 }
 
@@ -209,7 +210,7 @@
   font-size: 1rem;
   font-weight: 800;
   letter-spacing: -0.03em;
-  color: var(--accent);
+  color: var(--accent-deep);
   line-height: 1.1;
 }
 
@@ -237,7 +238,7 @@
   border: 0;
   border-radius: 0.75rem;
   background: linear-gradient(135deg, var(--accent), var(--accent-deep));
-  color: #1a1028;
+  color: var(--on-accent);
   padding: 0.7rem 1rem;
   font: inherit;
   font-weight: 700;
@@ -264,7 +265,7 @@
 
 .topbar .btn-ghost:hover {
   color: var(--text);
-  background: rgba(243, 238, 252, 0.06);
+  background: rgba(124, 92, 191, 0.08);
 }
 
 .topbar-icon-btn {
@@ -281,7 +282,7 @@
 
 .topbar-icon-btn:hover {
   color: var(--text);
-  background: rgba(243, 238, 252, 0.06);
+  background: rgba(124, 92, 191, 0.08);
 }
 
 .topbar-apps-icon {
@@ -302,7 +303,7 @@
 }
 
 .topbar-profile-btn:hover {
-  background: rgba(243, 238, 252, 0.06);
+  background: rgba(124, 92, 191, 0.08);
 }
 
 .topbar-avatar {
@@ -313,7 +314,7 @@
   height: 2rem;
   border-radius: 999px;
   background: linear-gradient(135deg, var(--accent), var(--accent-deep));
-  color: #1a1028;
+  color: var(--on-accent);
   font-size: 0.85rem;
   font-weight: 800;
 }
@@ -348,7 +349,7 @@
   border-radius: 0.85rem;
   border: 1px solid var(--line);
   background: var(--bg-elevated);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 18px 40px rgba(80, 50, 140, 0.12);
 }
 
 .topbar-dropdown__head {
@@ -386,7 +387,7 @@
 }
 
 .topbar-dropdown__item:hover {
-  background: rgba(243, 238, 252, 0.06);
+  background: rgba(124, 92, 191, 0.08);
 }
 
 .topbar-dropdown__item--danger {
@@ -407,7 +408,7 @@
   border-radius: 0.95rem;
   border: 1px solid var(--line);
   background: var(--bg-elevated);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 18px 40px rgba(80, 50, 140, 0.12);
 }
 
 .app-launcher__title {
@@ -432,15 +433,15 @@
   gap: 0.15rem;
   padding: 0.7rem 0.75rem;
   border-radius: 0.7rem;
-  border: 1px solid rgba(167, 139, 250, 0.16);
-  background: rgba(18, 15, 26, 0.55);
+  border: 1px solid var(--line);
+  background: var(--bg-soft);
   color: inherit;
   text-decoration: none;
 }
 
 .app-launcher__item--live:hover {
-  border-color: rgba(167, 139, 250, 0.45);
-  background: rgba(167, 139, 250, 0.12);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  background: color-mix(in srgb, var(--accent) 10%, white);
 }
 
 .app-launcher__name {
@@ -459,7 +460,7 @@
   margin-top: 0.65rem;
   padding-top: 0.65rem;
   border-top: 1px solid var(--line);
-  color: var(--accent);
+  color: var(--accent-deep);
   font-size: 0.88rem;
   font-weight: 600;
   text-decoration: none;
