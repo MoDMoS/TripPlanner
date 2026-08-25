@@ -52,8 +52,24 @@ export type TripDay = {
   id: string;
   dayNumber: number;
   title?: string | null;
+  startTime?: string | null;
+  startLabel?: string | null;
+  startLat?: number | null;
+  startLng?: number | null;
   transportMode: string;
   places: TripDayPlace[];
+  legs?: TripLeg[];
+};
+
+export type TripLeg = {
+  id: string;
+  fromPlaceId?: string | null;
+  toPlaceId?: string | null;
+  durationSec: number;
+  distanceM?: number | null;
+  mode: string;
+  isManualOverride: boolean;
+  warning?: string | null;
 };
 
 export type Trip = {
@@ -132,6 +148,73 @@ export const api = {
   removePlaceFromDay: (tripId: string, dayId: string, placeId: string) =>
     request<{ ok: true }>(`/trips/${tripId}/days/${dayId}/places/${placeId}`, {
       method: 'DELETE',
+    }),
+  calculateDayRoute: (
+    tripId: string,
+    dayId: string,
+    body?: {
+      transportMode?: 'walk' | 'drive' | 'bike' | 'transit';
+      startTime?: string;
+      startLat?: number;
+      startLng?: number;
+    },
+  ) =>
+    request<{
+      dayId: string;
+      mode: string;
+      needsManual: boolean;
+      warnings: string[];
+      schedule: {
+        stops: Array<{
+          placeId: string;
+          name: string;
+          arrive: string;
+          depart: string;
+          stayMinutes: number;
+        }>;
+        legs: Array<{
+          fromPlaceId: string | null;
+          toPlaceId: string;
+          durationSec: number;
+        }>;
+        endTime: string;
+      } | null;
+    }>(`/trips/${tripId}/days/${dayId}/route/calculate`, {
+      method: 'POST',
+      body: JSON.stringify(body ?? {}),
+    }),
+  saveDaySchedule: (
+    tripId: string,
+    dayId: string,
+    body: {
+      startTime: string;
+      startLabel?: string;
+      startLat?: number;
+      startLng?: number;
+      transportMode: 'walk' | 'drive' | 'bike' | 'transit';
+      stays: Array<{ placeId: string; stayMinutes: number }>;
+      legs?: Array<{
+        toPlaceId: string;
+        durationSec: number;
+        isManualOverride: boolean;
+      }>;
+      acknowledgeWarnings?: boolean;
+    },
+  ) =>
+    request<{
+      warnings: string[];
+      errors: string[];
+      schedule: {
+        stops: Array<{
+          placeId: string;
+          name: string;
+          arrive: string;
+          depart: string;
+        }>;
+      };
+    }>(`/trips/${tripId}/days/${dayId}/schedule`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
     }),
   searchPlaces: (body: { query: string; lat?: number; lng?: number }) =>
     request<SearchHit[]>('/places/search', {

@@ -4,6 +4,7 @@ import { api, type Trip } from '../api';
 import { useAuth } from '../auth';
 import { StepDays } from '../wizard/StepDays';
 import { StepPlaces } from '../wizard/StepPlaces';
+import { StepSchedule } from '../wizard/StepSchedule';
 import { WizardShell } from '../wizard/WizardShell';
 
 export function WizardPage() {
@@ -60,6 +61,20 @@ export function WizardPage() {
               .catch((err: Error) => setError(err.message));
           }}
         />
+      ) : step === 3 ? (
+        <StepSchedule
+          trip={trip}
+          onChanged={refresh}
+          onBack={() =>
+            void api.updateTrip(trip.id, { wizardStep: 2 }).then(refresh)
+          }
+          onContinue={() => {
+            void api
+              .updateTrip(trip.id, { wizardStep: 4 })
+              .then(refresh)
+              .catch((err: Error) => setError(err.message));
+          }}
+        />
       ) : (
         <div className="rounded-xl border border-slate-700 p-6 text-slate-300">
           <p>Step {step} UI comes in later milestones.</p>
@@ -67,10 +82,10 @@ export function WizardPage() {
             type="button"
             className="mt-4 text-sky-400"
             onClick={() =>
-              void api.updateTrip(trip.id, { wizardStep: 2 }).then(refresh)
+              void api.updateTrip(trip.id, { wizardStep: 3 }).then(refresh)
             }
           >
-            Back to days
+            Back to schedule
           </button>
           {error ? <p className="mt-2 text-rose-400">{error}</p> : null}
         </div>

@@ -14,6 +14,8 @@ import {
   MovePlaceDto,
   OrderDayDto,
   PatchDayDto,
+  PatchScheduleDto,
+  CalculateRouteDto,
 } from './dto/itinerary.dto';
 import { ItineraryService } from './itinerary.service';
 
@@ -101,5 +103,25 @@ export class ItineraryController {
       dto.toDayId,
       dto.index,
     );
+  }
+
+  @Post('days/:dayId/route/calculate')
+  calculateRoute(
+    @CurrentUser() user: AuthUser,
+    @Param('tripId') tripId: string,
+    @Param('dayId') dayId: string,
+    @Body() dto: CalculateRouteDto,
+  ) {
+    return this.itinerary.calculateDayRoute(user, tripId, dayId, dto);
+  }
+
+  @Patch('days/:dayId/schedule')
+  saveSchedule(
+    @CurrentUser() user: AuthUser,
+    @Param('tripId') tripId: string,
+    @Param('dayId') dayId: string,
+    @Body() dto: PatchScheduleDto,
+  ) {
+    return this.itinerary.saveSchedule(user, tripId, dayId, dto);
   }
 }
