@@ -1,16 +1,36 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   LngLatBounds,
   Map,
   Marker,
   NavigationControl,
   Popup,
+  type StyleSpecification,
 } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { TripPlace } from '../api';
 
-// Bright ≈ light Google-Maps-like basemap (still OSM / $0 — not Google tiles)
-const STYLE_URL = 'https://tiles.openfreemap.org/styles/bright';
+/**
+ * Raster basemap (Carto Voyager) — closer to light Google Maps and more reliable
+ * than OpenFreeMap vector styles when planet tiles fail (blank cream canvas).
+ */
+const MAP_STYLE: StyleSpecification = {
+  version: 8,
+  sources: {
+    carto: {
+      type: 'raster',
+      tiles: [
+        'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+        'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+        'https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+      ],
+      tileSize: 256,
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    },
+  },
+  layers: [{ id: 'carto', type: 'raster', source: 'carto' }],
+};
 
 /** Beyond this span (~90 km), fitBounds becomes unreadable — zoom to a city instead. */
 const MAX_FIT_SPAN_DEG = 0.8;
@@ -49,7 +69,6 @@ function framePlaces(map: Map, places: TripPlace[]) {
   const bounds = new LngLatBounds();
   for (const p of places) bounds.extend([p.lng, p.lat]);
 
-  // Taipei + Bangkok (etc.) → continental zoom → blank-looking basemap. Stay city-level.
   if (placesSpanTooLarge(places)) {
     const target = places[places.length - 1];
     map.flyTo({
@@ -109,25 +128,40 @@ export function TripMap({ places, focus, onSelectPlace, mapRef }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapInstance = useRef<Map | null>(null);
   const markers = useRef<Marker[]>([]);
+  const mapRefCb = useRef(mapRef);
   const placesRef = useRef(places);
   const onSelectRef = useRef(onSelectPlace);
+  const [mapError, setMapError] = useState<string | null>(null);
+
+  mapRefCb.current = mapRef;
   placesRef.current = places;
   onSelectRef.current = onSelectPlace;
 
   useEffect(() => {
     if (!containerRef.current || mapInstance.current) return;
 
+    let cancelled = false;
     const map = new Map({
       container: containerRef.current,
-      style: STYLE_URL,
+      style: MAP_STYLE,
       center: [100.5018, 13.7563],
       zoom: 11,
+      // Needed for DOCX canvas capture
       preserveDrawingBuffer: true,
     } as ConstructorParameters<typeof Map>[0]);
 
     map.addControl(new NavigationControl({ visualizePitch: false }), 'top-right');
 
+    map.on('error', (e) => {
+      const msg = e.error?.message || 'map error';
+      // Ignore benign tile 404s at high zoom; surface hard failures.
+      if (/failed to fetch|ajax|network|webgl/i.test(msg)) {
+        setMapError(msg);
+      }
+    });
+
     whenMapReady(map, () => {
+      if (cancelled) return;
       map.resize();
       markers.current.forEach((m) => m.remove());
       markers.current = buildMarkers(map, placesRef.current, (p) =>
@@ -136,21 +170,24 @@ export function TripMap({ places, focus, onSelectPlace, mapRef }: Props) {
       framePlaces(map, placesRef.current);
     });
 
-    const ro = new ResizeObserver(() => map.resize());
+    const ro = new ResizeObserver(() => {
+      map.resize();
+    });
     ro.observe(containerRef.current);
 
     mapInstance.current = map;
-    mapRef?.(map);
+    mapRefCb.current?.(map);
 
     return () => {
+      cancelled = true;
       ro.disconnect();
-      mapRef?.(null);
+      mapRefCb.current?.(null);
       markers.current.forEach((m) => m.remove());
       markers.current = [];
       map.remove();
       mapInstance.current = null;
     };
-  }, [mapRef]);
+  }, []);
 
   useEffect(() => {
     const map = mapInstance.current;
@@ -180,9 +217,14 @@ export function TripMap({ places, focus, onSelectPlace, mapRef }: Props) {
   return (
     <div className="relative h-full min-h-[320px] w-full">
       <div ref={containerRef} className="h-full min-h-[320px] w-full rounded-xl" />
+      {mapError ? (
+        <p className="absolute left-3 right-3 top-3 rounded-lg bg-rose-950/90 px-3 py-2 text-xs text-rose-200">
+          โหลดแผนที่ไม่สำเร็จ: {mapError}
+        </p>
+      ) : null}
       {farApart ? (
         <p className="pointer-events-none absolute bottom-3 left-3 right-3 rounded-lg bg-slate-950/80 px-3 py-2 text-xs text-amber-200">
-          สถานที่อยู่คนละเมือง — แผนที่ไม่ซูมครอบทั้งหมด กด Focus ที่รายการเพื่อดูถนนระดับเมือง
+          สถานที่อยู่คนละเมือง — กด Focus ที่รายการเพื่อดูถนนระดับเมือง
         </p>
       ) : null}
     </div>

@@ -22,3 +22,5 @@ Switch MapLibre style URL from Liberty to Bright:
 ## Follow-up (2026-08-26)
 
 Blank-looking map with Taipei + Bangkok pins was caused by `fitBounds` zooming to continental scale (~z4–5), where Bright shows almost no roads. Fix: if place span &gt; ~0.8°, fly to the latest place at city zoom instead of fitting all; show a Focus hint.
+
+Completely white map: OpenFreeMap **vector** planet tiles often fail in-browser → only style background `#f8f4f0`. Switched basemap to **Carto Voyager raster** (still OSM-derived, $0, closer to light Google Maps).

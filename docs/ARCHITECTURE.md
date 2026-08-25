@@ -48,7 +48,7 @@ Wizard steps: Places → Days → Schedule → Preview → Export.
 
 | Need | Provider |
 |------|----------|
-| Map tiles | OpenFreeMap **Bright** style + MapLibre GL JS (`TripMap`) |
+| Map tiles | Carto Voyager raster via MapLibre (`TripMap`) — OpenFreeMap vector dropped (blank canvas when planet tiles fail) |
 | Name search | Photon |
 | Reverse geocode | Nominatim (≤ 1 req/s queue, never on keystroke path) |
 | Routing walk/drive/bike | FOSSGIS OSRM |
