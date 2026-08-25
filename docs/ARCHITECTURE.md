@@ -1,6 +1,6 @@
 # TripPlanner Architecture
 
-อัปเดต: 2026-08-25
+อัปเดต: 2026-08-26
 
 TripPlanner is a MoDMoS sibling application composed of:
 
@@ -15,12 +15,19 @@ During local development, Vite proxies `/trip-api/*` to `http://127.0.0.1:3003/*
 
 Portal authentication requests under `/api/auth` are proxied unchanged to `http://127.0.0.1:3001`.
 
-## Current scope
+## Authentication
 
-The current scaffold exposes the public `GET /health` endpoint returning raw JSON:
+The API installs `JwtCookieGuard` globally. It verifies the Portal
+`access_token` cookie with the shared `AUTH_SECRET`, requires the exact
+`service:trip-planner` permission, and exposes JWT identity as
+`AuthUser { userId, email, name, roles, permissions }`. The `GET /health`
+endpoint remains public through `@Public()`.
 
-```json
-{ "ok": true }
-```
+`UsersService.ensureFromJwt()` upserts the local user by Portal JWT `sub`.
+Trip ownership will use that same identifier.
 
-SSO enforcement, database models, and Portal integration are introduced in later milestones.
+## Database
+
+TripPlanner uses the `tripplanner` database in the existing Portal PostgreSQL
+cluster (`127.0.0.1:5433` from the host). Prisma models cover users, trips,
+places, itinerary days and ordering, route legs, and place/route caches.

@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id
+  email     String?
+  name      String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  trips     Trip[]
+}
+
+model Trip {
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  name        String
+  destination String?
+  startDate   DateTime?
+  endDate     DateTime?
+  wizardStep  Int         @default(1)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  places      TripPlace[]
+  days        TripDay[]
+
+  @@index([userId])
+}
+
+model TripPlace {
+  id        String         @id @default(cuid())
+  tripId    String
+  trip      Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  name      String
+  address   String?
+  lat       Float
+  lng       Float
+  source    String
+  sourceUrl String?
+  category  String?
+  notes     String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  dayPlaces TripDayPlace[]
+
+  @@index([tripId])
+}
+
+model TripDay {
+  id            String         @id @default(cuid())
+  tripId        String
+  trip          Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  dayNumber     Int
+  title         String?
+  startTime     String?
+  startLat      Float?
+  startLng      Float?
+  startLabel    String?
+  transportMode String         @default("drive")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  places        TripDayPlace[]
+  legs          TripLeg[]
+
+  @@unique([tripId, dayNumber])
+}
+
+model TripDayPlace {
+  id          String    @id @default(cuid())
+  dayId       String
+  day         TripDay   @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  placeId     String
+  place       TripPlace @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  sortOrder   Int
+  stayMinutes Int       @default(60)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([dayId, placeId])
+  @@index([dayId, sortOrder])
+}
+
+model TripLeg {
+  id               String   @id @default(cuid())
+  dayId            String
+  day              TripDay  @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  fromPlaceId      String?
+  toPlaceId        String?
+  durationSec      Int
+  distanceM        Int?
+  mode             String
+  isManualOverride Boolean  @default(false)
+  warning          String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([dayId])
+}
+
+model PlaceCache {
+  key       String   @id
+  payload   Json
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RouteCache {
+  key       String   @id
+  payload   Json
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
