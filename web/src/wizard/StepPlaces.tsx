@@ -117,7 +117,7 @@ export function StepPlaces({ trip, onChanged, onContinue }: Props) {
             type="button"
             disabled={busy || !link.trim()}
             onClick={() => void resolveLink()}
-            className="mt-2 w-full rounded-lg bg-sky-500 px-3 py-2 text-sm font-semibold text-slate-950 disabled:opacity-40"
+            className="mt-2 w-full rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-violet-950 disabled:opacity-40"
           >
             Resolve & add
           </button>
@@ -151,7 +151,7 @@ export function StepPlaces({ trip, onChanged, onContinue }: Props) {
                 </button>
                 <button
                   type="button"
-                  className="mt-1 text-xs text-sky-400"
+                  className="mt-1 text-xs text-violet-400"
                   onClick={() => void addHit(hit)}
                 >
                   Add to My Places
@@ -188,7 +188,7 @@ export function StepPlaces({ trip, onChanged, onContinue }: Props) {
               <div className="mt-1 flex gap-2 text-xs">
                 <button
                   type="button"
-                  className="text-sky-400"
+                  className="text-violet-400"
                   onClick={() => setFocus({ lat: place.lat, lng: place.lng })}
                 >
                   Focus
@@ -208,7 +208,7 @@ export function StepPlaces({ trip, onChanged, onContinue }: Props) {
           type="button"
           disabled={!canContinue}
           onClick={onContinue}
-          className="mt-4 rounded-lg bg-emerald-500 px-3 py-2 text-sm font-semibold text-slate-950 disabled:opacity-40"
+          className="mt-4 rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-violet-950 disabled:opacity-40"
         >
           Continue to days →
         </button>

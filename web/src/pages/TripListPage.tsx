@@ -5,7 +5,7 @@ import { useAuth } from '../auth';
 
 export function TripListPage() {
   const navigate = useNavigate();
-  const { user, loading, hasTripAccess, logout } = useAuth();
+  const { user, loading, hasTripAccess } = useAuth();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +20,7 @@ export function TripListPage() {
   }, [hasTripAccess]);
 
   if (loading) {
-    return <p className="p-8 text-slate-300">Loading…</p>;
+    return <p className="p-8 text-violet-200/70">Loading…</p>;
   }
   if (!user) {
     const next = encodeURIComponent(
@@ -28,8 +28,8 @@ export function TripListPage() {
     );
     return (
       <main className="p-8">
-        <p className="text-slate-300">กรุณาเข้าสู่ระบบที่ Portal</p>
-        <a className="text-sky-400" href={`/login?next=${next}`}>
+        <p className="text-violet-100/80">กรุณาเข้าสู่ระบบที่ Portal</p>
+        <a className="text-violet-300" href={`/login?next=${next}`}>
           ไปหน้า Login
         </a>
       </main>
@@ -37,7 +37,7 @@ export function TripListPage() {
   }
   if (!hasTripAccess) {
     return (
-      <main className="p-8 text-slate-300">
+      <main className="p-8 text-violet-100/80">
         ไม่มีสิทธิ์ `service:trip-planner`
       </main>
     );
@@ -45,14 +45,9 @@ export function TripListPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-50">Your trips</h1>
-          <p className="text-sm text-slate-400">{user.name}</p>
-        </div>
-        <button type="button" className="text-sm text-slate-400" onClick={() => void logout()}>
-          Logout
-        </button>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-violet-50">Your trips</h1>
+        <p className="text-sm text-violet-300/70">{user.name}</p>
       </div>
 
       <form
@@ -70,14 +65,14 @@ export function TripListPage() {
         }}
       >
         <input
-          className="flex-1 rounded-lg border border-slate-600 bg-slate-950 px-3 py-2"
+          className="flex-1 rounded-lg border border-violet-500/30 bg-violet-950/50 px-3 py-2 text-violet-50 placeholder:text-violet-300/40"
           placeholder="Trip name"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <button
           type="submit"
-          className="rounded-lg bg-sky-500 px-4 py-2 font-semibold text-slate-950"
+          className="rounded-lg bg-violet-500 px-4 py-2 font-semibold text-violet-950 hover:bg-violet-400"
         >
           New trip
         </button>
@@ -90,10 +85,10 @@ export function TripListPage() {
           <li key={trip.id}>
             <Link
               to={`/trips/${trip.id}`}
-              className="block rounded-xl border border-slate-700 bg-slate-900/70 p-4 hover:border-sky-500/50"
+              className="block rounded-xl border border-violet-500/25 bg-violet-950/40 p-4 hover:border-violet-400/50"
             >
-              <div className="font-semibold text-slate-50">{trip.name}</div>
-              <div className="text-xs text-slate-400">
+              <div className="font-semibold text-violet-50">{trip.name}</div>
+              <div className="text-xs text-violet-300/70">
                 {trip.places?.length ?? 0} places · step {trip.wizardStep}
               </div>
             </Link>

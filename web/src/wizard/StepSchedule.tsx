@@ -152,7 +152,7 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
         <button
           type="button"
           disabled={busy}
-          className="rounded-lg bg-emerald-500 px-3 py-2 text-sm font-semibold text-slate-950 disabled:opacity-40"
+          className="rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-violet-950 disabled:opacity-40"
           onClick={onContinue}
         >
           Continue to preview →
@@ -165,7 +165,7 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
             key={d.id}
             type="button"
             className={`rounded-full px-3 py-1 text-sm ${
-              d.id === day.id ? 'bg-sky-500 text-slate-950' : 'bg-slate-800'
+              d.id === day.id ? 'bg-violet-500 text-violet-950' : 'bg-violet-900/80'
             }`}
             onClick={() => setDayId(d.id)}
           >
@@ -260,7 +260,7 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
           <button
             type="button"
             disabled={busy}
-            className="rounded-lg bg-sky-500 px-3 py-2 text-sm font-semibold text-slate-950"
+            className="rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-violet-950"
             onClick={() => void calculate(day)}
           >
             Calculate travel times
@@ -293,7 +293,7 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
           </label>
           <button
             type="button"
-            className="mt-2 text-sky-300"
+            className="mt-2 text-violet-300"
             disabled={!ack || busy}
             onClick={() => void save(true)}
           >

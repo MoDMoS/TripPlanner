@@ -44,7 +44,7 @@ export function StepExport({ trip, onBack }: Props) {
         <button
           type="button"
           disabled={busy}
-          className="rounded-lg bg-emerald-500 px-3 py-2 text-sm font-semibold text-slate-950 disabled:opacity-40"
+          className="rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-violet-950 disabled:opacity-40"
           onClick={() => void download()}
         >
           Download .docx

@@ -119,7 +119,7 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
         <button
           type="button"
           disabled={busy}
-          className="rounded-lg bg-sky-500 px-3 py-2 text-sm font-semibold text-slate-950"
+          className="rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-violet-950"
           onClick={() => void addDay()}
         >
           + Add day
@@ -127,7 +127,7 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
         <button
           type="button"
           disabled={!canContinue}
-          className="rounded-lg bg-emerald-500 px-3 py-2 text-sm font-semibold text-slate-950 disabled:opacity-40"
+          className="rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-violet-950 disabled:opacity-40"
           onClick={onContinue}
         >
           Continue to schedule →
@@ -149,7 +149,7 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
                     <button
                       key={day.id}
                       type="button"
-                      className="rounded bg-slate-800 px-2 py-1 text-xs text-sky-300"
+                      className="rounded bg-violet-900/80 px-2 py-1 text-xs text-violet-300"
                       onClick={() =>
                         void api
                           .assignPlaceToDay(trip.id, day.id, place.id)

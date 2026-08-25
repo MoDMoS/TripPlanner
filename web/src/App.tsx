@@ -2,17 +2,18 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './auth';
 import { TripListPage } from './pages/TripListPage';
 import { WizardPage } from './pages/WizardPage';
+import { Layout } from './shell/Layout';
 
 export default function App() {
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-slate-950 text-slate-100">
-        <Routes>
+      <Routes>
+        <Route element={<Layout />}>
           <Route path="/" element={<TripListPage />} />
           <Route path="/trips/:id" element={<WizardPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
+        </Route>
+      </Routes>
     </AuthProvider>
   );
 }

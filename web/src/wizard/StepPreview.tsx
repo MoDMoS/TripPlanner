@@ -40,7 +40,7 @@ export function StepPreview({ trip, onBack, onContinue }: Props) {
         </button>
         <button
           type="button"
-          className="rounded-lg bg-emerald-500 px-3 py-2 text-sm font-semibold text-slate-950"
+          className="rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-violet-950"
           onClick={onContinue}
         >
           Continue to export →
@@ -72,7 +72,7 @@ export function StepPreview({ trip, onBack, onContinue }: Props) {
             key={d.id}
             type="button"
             className={`rounded-full px-3 py-1 text-sm ${
-              i === dayIndex ? 'bg-sky-500 text-slate-950' : 'bg-slate-800'
+              i === dayIndex ? 'bg-violet-500 text-violet-950' : 'bg-violet-900/80'
             }`}
             onClick={() => setDayIndex(i)}
           >
