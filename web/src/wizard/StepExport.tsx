@@ -36,7 +36,7 @@ export function StepExport({ trip, onBack }: Props) {
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          className="rounded-lg border border-violet-200 px-3 py-2 text-sm"
+          className="rounded-lg border border-violet-500/25 px-3 py-2 text-sm"
           onClick={onBack}
         >
           ← Preview
@@ -44,17 +44,17 @@ export function StepExport({ trip, onBack }: Props) {
         <button
           type="button"
           disabled={busy}
-          className="rounded-lg bg-violet-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
+          className="rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-violet-950 disabled:opacity-40"
           onClick={() => void download()}
         >
           Download .docx
         </button>
       </div>
-      <p className="text-sm text-violet-600/80">
+      <p className="text-sm text-violet-300/80">
         Map snapshot is attached when the browser allows canvas capture; otherwise the
         document still exports with the text itinerary.
       </p>
-      <div className="h-64 overflow-hidden rounded-xl border border-violet-200">
+      <div className="h-64 overflow-hidden rounded-xl border border-violet-500/25">
         <TripMap places={trip.places ?? []} mapRef={setMap} />
       </div>
       {error ? <p className="text-sm text-rose-400">{error}</p> : null}

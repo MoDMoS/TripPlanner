@@ -102,13 +102,13 @@ export function StepPlaces({ trip, onChanged, onContinue }: Props) {
 
   return (
     <div className="grid min-h-[70vh] gap-4 lg:grid-cols-[280px_minmax(0,1fr)_260px]">
-      <aside className="space-y-4 rounded-xl border border-violet-200 bg-white/85 p-4">
+      <aside className="space-y-4 rounded-xl border border-violet-500/25 bg-violet-950/40 p-4">
         <div>
-          <label className="text-xs font-semibold uppercase tracking-wide text-violet-600/80">
+          <label className="text-xs font-semibold uppercase tracking-wide text-violet-300/80">
             Google Maps link
           </label>
           <input
-            className="mt-1 w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-violet-500/30 bg-violet-950/50 px-3 py-2 text-sm"
             value={link}
             onChange={(e) => setLink(e.target.value)}
             placeholder="https://maps.app.goo.gl/..."
@@ -117,17 +117,17 @@ export function StepPlaces({ trip, onChanged, onContinue }: Props) {
             type="button"
             disabled={busy || !link.trim()}
             onClick={() => void resolveLink()}
-            className="mt-2 w-full rounded-lg bg-violet-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
+            className="mt-2 w-full rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-violet-950 disabled:opacity-40"
           >
             Resolve & add
           </button>
         </div>
         <div>
-          <label className="text-xs font-semibold uppercase tracking-wide text-violet-600/80">
+          <label className="text-xs font-semibold uppercase tracking-wide text-violet-300/80">
             Search name (OSM)
           </label>
           <input
-            className="mt-1 w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-violet-500/30 bg-violet-950/50 px-3 py-2 text-sm"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Taipei 101"
@@ -136,7 +136,7 @@ export function StepPlaces({ trip, onChanged, onContinue }: Props) {
             {hits.map((hit) => (
               <li
                 key={`${hit.name}-${hit.lat}-${hit.lng}`}
-                className="rounded-lg border border-violet-200 p-2"
+                className="rounded-lg border border-violet-500/25 p-2"
               >
                 <button
                   type="button"
@@ -146,12 +146,12 @@ export function StepPlaces({ trip, onChanged, onContinue }: Props) {
                     setPreview(hit);
                   }}
                 >
-                  <div className="font-medium text-violet-950">{hit.name}</div>
-                  <div className="text-xs text-violet-600/80">{hit.address}</div>
+                  <div className="font-medium text-violet-100">{hit.name}</div>
+                  <div className="text-xs text-violet-300/80">{hit.address}</div>
                 </button>
                 <button
                   type="button"
-                  className="mt-1 text-xs text-violet-700"
+                  className="mt-1 text-xs text-violet-300"
                   onClick={() => void addHit(hit)}
                 >
                   Add to My Places
@@ -161,10 +161,10 @@ export function StepPlaces({ trip, onChanged, onContinue }: Props) {
           </ul>
         </div>
         {preview ? (
-          <div className="rounded-lg border border-violet-200 p-3 text-sm">
+          <div className="rounded-lg border border-violet-500/25 p-3 text-sm">
             <div className="font-semibold">{preview.name}</div>
-            <div className="text-xs text-violet-600/80">{preview.address}</div>
-            <div className="mt-1 text-xs text-violet-500">
+            <div className="text-xs text-violet-300/80">{preview.address}</div>
+            <div className="mt-1 text-xs text-violet-400">
               {preview.lat.toFixed(5)}, {preview.lng.toFixed(5)}
             </div>
           </div>
@@ -172,23 +172,23 @@ export function StepPlaces({ trip, onChanged, onContinue }: Props) {
         {error ? <p className="text-sm text-rose-400">{error}</p> : null}
       </aside>
 
-      <section className="min-h-[320px] overflow-hidden rounded-xl border border-violet-200">
+      <section className="min-h-[320px] overflow-hidden rounded-xl border border-violet-500/25">
         <TripMap places={mapPlaces} focus={focus} />
       </section>
 
-      <aside className="flex flex-col rounded-xl border border-violet-200 bg-white/85 p-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-violet-600/80">
+      <aside className="flex flex-col rounded-xl border border-violet-500/25 bg-violet-950/40 p-4">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-violet-300/80">
           My Places ({places.length})
         </h2>
         <ul className="mt-3 flex-1 space-y-2 overflow-auto text-sm">
           {places.map((place) => (
-            <li key={place.id} className="rounded-lg border border-violet-200 p-2">
+            <li key={place.id} className="rounded-lg border border-violet-500/25 p-2">
               <div className="font-medium">{place.name}</div>
-              <div className="text-xs text-violet-600/80">{place.address}</div>
+              <div className="text-xs text-violet-300/80">{place.address}</div>
               <div className="mt-1 flex gap-2 text-xs">
                 <button
                   type="button"
-                  className="text-violet-700"
+                  className="text-violet-300"
                   onClick={() => setFocus({ lat: place.lat, lng: place.lng })}
                 >
                   Focus
@@ -208,7 +208,7 @@ export function StepPlaces({ trip, onChanged, onContinue }: Props) {
           type="button"
           disabled={!canContinue}
           onClick={onContinue}
-          className="mt-4 rounded-lg bg-violet-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
+          className="mt-4 rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-violet-950 disabled:opacity-40"
         >
           Continue to days →
         </button>

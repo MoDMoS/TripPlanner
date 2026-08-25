@@ -2,8 +2,8 @@
 
 :root {
   font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
-  color: #2a2140;
-  background: #f3eefb;
+  color: #ebe4f7;
+  background: #1a1624;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
@@ -13,9 +13,9 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(ellipse 70% 45% at 10% -5%, rgba(167, 139, 250, 0.28), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 100% 0%, rgba(196, 181, 253, 0.22), transparent 50%),
-    linear-gradient(180deg, #f7f3fc 0%, #f3eefb 40%, #ebe4f7 100%);
+    radial-gradient(ellipse 70% 45% at 12% -8%, rgba(155, 127, 212, 0.18), transparent 55%),
+    radial-gradient(ellipse 50% 35% at 100% 0%, rgba(126, 91, 184, 0.1), transparent 45%),
+    linear-gradient(180deg, #221c30 0%, #1a1624 45%, #14101c 100%);
 }
 
 #root {
