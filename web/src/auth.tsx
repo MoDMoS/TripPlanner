@@ -56,7 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const hasTripAccess = Boolean(
     user?.permissions?.includes('service:trip-planner') ||
-      user?.permissions?.includes('admin:access'),
+      user?.permissions?.includes('admin:access') ||
+      user?.roles?.includes('admin'),
   );
 
   const value = useMemo(

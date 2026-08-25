@@ -10,9 +10,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     if (response.status === 401) {
-      const next = encodeURIComponent(window.location.href);
-      window.location.assign(`/login?next=${next}`);
-      throw new Error('กรุณาเข้าสู่ระบบ');
+      // Do not hard-redirect to Portal login here: if /api/auth/me succeeded but
+      // trip-api rejects the cookie, AUTH_SECRET is usually mismatched and a
+      // redirect loop looks like "bouncing back to Portal".
+      throw new Error(
+        'Trip API ไม่รับ session (401) — ตรวจ AUTH_SECRET ให้ตรงกับ Portal แล้ว pm2 restart tripplanner-api จากนั้น logout/login ใหม่',
+      );
     }
     let detail = response.statusText;
     try {

@@ -23,10 +23,13 @@ export function TripListPage() {
     return <p className="p-8 text-slate-300">Loading…</p>;
   }
   if (!user) {
+    const next = encodeURIComponent(
+      `${window.location.origin}${import.meta.env.BASE_URL}`,
+    );
     return (
       <main className="p-8">
         <p className="text-slate-300">กรุณาเข้าสู่ระบบที่ Portal</p>
-        <a className="text-sky-400" href="/login">
+        <a className="text-sky-400" href={`/login?next=${next}`}>
           ไปหน้า Login
         </a>
       </main>

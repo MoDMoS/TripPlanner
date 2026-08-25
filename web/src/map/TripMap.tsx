@@ -9,7 +9,8 @@ import {
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { TripPlace } from '../api';
 
-const STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
+// Bright ≈ light Google-Maps-like basemap (still OSM / $0 — not Google tiles)
+const STYLE_URL = 'https://tiles.openfreemap.org/styles/bright';
 
 type Props = {
   places: TripPlace[];

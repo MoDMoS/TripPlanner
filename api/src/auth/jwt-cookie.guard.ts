@@ -20,6 +20,7 @@ type JwtPayload = {
 };
 
 const TRIP_PLANNER_PERMISSION = 'service:trip-planner';
+const ADMIN_ACCESS_PERMISSION = 'admin:access';
 
 @Injectable()
 export class JwtCookieGuard implements CanActivate {
@@ -50,7 +51,11 @@ export class JwtCookieGuard implements CanActivate {
         ? payload.permissions
         : [];
 
-      if (!permissions.includes(TRIP_PLANNER_PERMISSION)) {
+      const allowed =
+        permissions.includes(TRIP_PLANNER_PERMISSION) ||
+        permissions.includes(ADMIN_ACCESS_PERMISSION) ||
+        roles.includes('admin');
+      if (!allowed) {
         throw new ForbiddenException(
           'Trip Planner service access required',
         );

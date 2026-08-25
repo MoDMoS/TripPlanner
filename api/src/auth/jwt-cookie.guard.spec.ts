@@ -62,6 +62,27 @@ describe('JwtCookieGuard', () => {
     );
   });
 
+  it('allows admin:access without service:trip-planner', () => {
+    const jwt = {
+      verify: jest.fn().mockReturnValue({
+        sub: 'admin-1',
+        email: 'admin@example.com',
+        name: 'Admin',
+        roles: ['admin'],
+        permissions: ['admin:access'],
+      }),
+    } as unknown as JwtService;
+    const reflector = {
+      getAllAndOverride: jest.fn().mockReturnValue(false),
+    } as unknown as Reflector;
+    const request: Record<string, unknown> = {
+      cookies: { access_token: 'valid-token' },
+    };
+    const guard = new JwtCookieGuard(jwt, reflector);
+
+    expect(guard.canActivate(makeContext(request))).toBe(true);
+  });
+
   it('attaches AuthUser when JWT has service:trip-planner', () => {
     const jwt = {
       verify: jest.fn().mockReturnValue({

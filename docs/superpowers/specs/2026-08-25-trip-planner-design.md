@@ -36,7 +36,7 @@ External (keyless, no billing), behind provider abstractions + DB cache:
 
 | Need | Provider (Phase 1) | Phase 2 |
 |------|--------------------|---------|
-| Map tiles | OpenFreeMap (MapLibre GL JS) | Self-host tiles |
+| Map tiles | OpenFreeMap Bright (MapLibre GL JS) | Self-host tiles |
 | Name search | Photon | Self-host Photon/Nominatim |
 | Reverse/structured geocode | Nominatim (never on keystroke path) | Self-host Nominatim (country extracts) |
 | Routing walk/drive/bike | FOSSGIS OSRM (+ Valhalla optional) | Self-host OSRM |
