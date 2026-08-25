@@ -19,7 +19,6 @@ Switch MapLibre style URL from Liberty to Bright:
 - Numbered markers / route polylines
 - Style picker UI
 
-## Change
+## Follow-up (2026-08-26)
 
-- `web/src/map/TripMap.tsx` — `STYLE_URL`
-- Docs: `ARCHITECTURE.md`, parent design table
+Blank-looking map with Taipei + Bangkok pins was caused by `fitBounds` zooming to continental scale (~z4–5), where Bright shows almost no roads. Fix: if place span &gt; ~0.8°, fly to the latest place at city zoom instead of fitting all; show a Focus hint.
