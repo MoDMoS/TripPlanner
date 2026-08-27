@@ -70,6 +70,7 @@ export function Layout() {
             >
               <span className="app-sidebar-icon">{item.icon}</span>
               {open ? <span className="app-sidebar-text">{item.label}</span> : null}
+              <span className="app-sidebar-tooltip">{item.label}</span>
             </NavLink>
           ))}
         </nav>
