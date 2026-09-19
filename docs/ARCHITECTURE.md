@@ -43,7 +43,7 @@ places, itinerary days and ordering, route legs, and place/route caches.
 | `routing` | OSRM matrix abstraction + `RouteCache` |
 | `export` | `.docx` via `docx` (optional MapLibre canvas PNG) |
 
-Wizard steps: Places → Days → Schedule → Preview → Export.
+Wizard steps: Places → Days (once / reusable unassigned pools) → Schedule → Preview → Export.
 
 ## Zero-cost external services (Phase 1)
 

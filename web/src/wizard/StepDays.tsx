@@ -14,7 +14,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useMemo, useState } from 'react';
-import { api, type Trip, type TripPlace } from '../api';
+import { api, type Trip, type TripDay, type TripPlace } from '../api';
 
 type Props = {
   trip: Trip;
@@ -54,21 +54,78 @@ function SortableItem({
   );
 }
 
+function PlaceAssignCard({
+  place,
+  days,
+  busy,
+  onAssign,
+}: {
+  place: TripPlace;
+  days: TripDay[];
+  busy: boolean;
+  onAssign: (dayId: string) => void;
+}) {
+  const dayIdsWithPlace = useMemo(() => {
+    const ids = new Set<string>();
+    for (const day of days) {
+      if (day.places?.some((row) => row.placeId === place.id)) {
+        ids.add(day.id);
+      }
+    }
+    return ids;
+  }, [days, place.id]);
+
+  const targets = days.filter((day) => !dayIdsWithPlace.has(day.id));
+
+  return (
+    <li className="rounded-lg border border-violet-500/25 p-2">
+      <div className="font-medium">{place.name}</div>
+      {targets.length ? (
+        <div className="mt-1 flex flex-wrap gap-1">
+          {targets.map((day) => (
+            <button
+              key={day.id}
+              type="button"
+              disabled={busy}
+              className="rounded bg-violet-900/70 px-2 py-1 text-xs text-violet-300 disabled:opacity-40"
+              onClick={() => onAssign(day.id)}
+            >
+              → Day {day.dayNumber}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-1 text-xs text-violet-400/70">อยู่ในทุกวันแล้ว</p>
+      )}
+    </li>
+  );
+}
+
 export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const sensors = useSensors(useSensor(PointerSensor));
+  const days = trip.days ?? [];
+  const places = trip.places ?? [];
 
   const assignedIds = useMemo(() => {
     const ids = new Set<string>();
-    for (const day of trip.days ?? []) {
+    for (const day of days) {
       for (const row of day.places ?? []) ids.add(row.placeId);
     }
     return ids;
-  }, [trip.days]);
+  }, [days]);
 
-  const unassigned: TripPlace[] = (trip.places ?? []).filter(
-    (p) => !assignedIds.has(p.id),
+  /** Not on any day yet — exclusive pool */
+  const onceOnly = useMemo(
+    () => places.filter((p) => !assignedIds.has(p.id)),
+    [places, assignedIds],
+  );
+
+  /** On ≥1 day — reusable on other days */
+  const reusable = useMemo(
+    () => places.filter((p) => assignedIds.has(p.id)),
+    [places, assignedIds],
   );
 
   async function addDay() {
@@ -83,10 +140,23 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
     }
   }
 
+  async function assignToDay(placeId: string, dayId: string) {
+    setBusy(true);
+    setError(null);
+    try {
+      await api.assignPlaceToDay(trip.id, dayId, placeId);
+      await onChanged();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'assign failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function onDragEnd(dayId: string, event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const day = (trip.days ?? []).find((d) => d.id === dayId);
+    const day = days.find((d) => d.id === dayId);
     if (!day) return;
     const ids = day.places.map((p) => p.placeId);
     const oldIndex = ids.indexOf(String(active.id));
@@ -104,7 +174,7 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
     }
   }
 
-  const canContinue = (trip.days ?? []).some((d) => d.places.length > 0);
+  const canContinue = days.some((d) => d.places.length > 0);
 
   return (
     <div className="space-y-4">
@@ -135,41 +205,56 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
       </div>
       {error ? <p className="text-sm text-rose-400">{error}</p> : null}
 
-      <div className="grid gap-4 lg:grid-cols-[240px_repeat(auto-fit,minmax(220px,1fr))]">
-        <section className="rounded-xl border border-violet-500/25 bg-violet-950/40 p-4">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-violet-300/80">
-            Unassigned
-          </h2>
-          <ul className="mt-3 space-y-2 text-sm">
-            {unassigned.map((place) => (
-              <li key={place.id} className="rounded-lg border border-violet-500/25 p-2">
-                <div className="font-medium">{place.name}</div>
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {(trip.days ?? []).map((day) => (
-                    <button
-                      key={day.id}
-                      type="button"
-                      className="rounded bg-violet-900/70 px-2 py-1 text-xs text-violet-300"
-                      onClick={() =>
-                        void api
-                          .assignPlaceToDay(trip.id, day.id, place.id)
-                          .then(onChanged)
-                          .catch((err: Error) => setError(err.message))
-                      }
-                    >
-                      → Day {day.dayNumber}
-                    </button>
-                  ))}
-                </div>
-              </li>
-            ))}
-            {!unassigned.length ? (
-              <li className="text-xs text-violet-400">All places assigned</li>
-            ) : null}
-          </ul>
-        </section>
+      <div className="grid gap-4 lg:grid-cols-[260px_repeat(auto-fit,minmax(220px,1fr))]">
+        <div className="space-y-4">
+          <section className="rounded-xl border border-violet-500/25 bg-violet-950/40 p-4">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-violet-300/80">
+              ใช้ครั้งเดียว
+            </h2>
+            <p className="mt-1 text-[11px] text-violet-400/70">
+              ยังไม่ได้อยู่ในวันใด — ใส่แล้วจะย้ายไป「ใช้ซ้ำได้」
+            </p>
+            <ul className="mt-3 space-y-2 text-sm">
+              {onceOnly.map((place) => (
+                <PlaceAssignCard
+                  key={place.id}
+                  place={place}
+                  days={days}
+                  busy={busy}
+                  onAssign={(dayId) => void assignToDay(place.id, dayId)}
+                />
+              ))}
+              {!onceOnly.length ? (
+                <li className="text-xs text-violet-400">ว่าง</li>
+              ) : null}
+            </ul>
+          </section>
 
-        {(trip.days ?? []).map((day) => (
+          <section className="rounded-xl border border-violet-400/30 bg-violet-950/40 p-4">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-violet-300/80">
+              ใช้ซ้ำได้
+            </h2>
+            <p className="mt-1 text-[11px] text-violet-400/70">
+              อยู่ในอย่างน้อย 1 วัน — ใส่วันอื่นได้อีก
+            </p>
+            <ul className="mt-3 space-y-2 text-sm">
+              {reusable.map((place) => (
+                <PlaceAssignCard
+                  key={place.id}
+                  place={place}
+                  days={days}
+                  busy={busy}
+                  onAssign={(dayId) => void assignToDay(place.id, dayId)}
+                />
+              ))}
+              {!reusable.length ? (
+                <li className="text-xs text-violet-400">ว่าง — ใส่จาก「ใช้ครั้งเดียว」ก่อน</li>
+              ) : null}
+            </ul>
+          </section>
+        </div>
+
+        {days.map((day) => (
           <section
             key={day.id}
             className="rounded-xl border border-violet-500/25 bg-violet-950/40 p-4"
