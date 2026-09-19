@@ -41,6 +41,7 @@ export type TripPlace = {
   source: string;
   sourceUrl?: string | null;
   category?: string | null;
+  allowReuse?: boolean;
 };
 
 export type TripDayPlace = {
@@ -128,6 +129,15 @@ export const api = {
   removePlace: (tripId: string, placeId: string) =>
     request<{ ok: true }>(`/trips/${tripId}/places/${placeId}`, {
       method: 'DELETE',
+    }),
+  updatePlace: (
+    tripId: string,
+    placeId: string,
+    body: { allowReuse?: boolean },
+  ) =>
+    request<TripPlace>(`/trips/${tripId}/places/${placeId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
     }),
   createDay: (tripId: string, title?: string) =>
     request<TripDay>(`/trips/${tripId}/days`, {

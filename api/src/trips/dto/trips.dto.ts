@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsIn,
   IsNumber,
   IsOptional,
@@ -69,4 +70,10 @@ export class AddTripPlaceDto {
   @IsOptional()
   @IsString()
   notes?: string;
+}
+
+export class UpdateTripPlaceDto {
+  @IsOptional()
+  @IsBoolean()
+  allowReuse?: boolean;
 }

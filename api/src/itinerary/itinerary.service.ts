@@ -98,10 +98,19 @@ export class ItineraryService {
     if (!place) throw new NotFoundException('ไม่พบสถานที่');
 
     const count = await this.prisma.tripDayPlace.count({ where: { dayId } });
-    return this.prisma.tripDayPlace.upsert({
+    await this.prisma.$transaction([
+      this.prisma.tripPlace.update({
+        where: { id: placeId },
+        data: { allowReuse: true },
+      }),
+      this.prisma.tripDayPlace.upsert({
+        where: { dayId_placeId: { dayId, placeId } },
+        create: { dayId, placeId, sortOrder: count, stayMinutes },
+        update: { stayMinutes },
+      }),
+    ]);
+    return this.prisma.tripDayPlace.findUniqueOrThrow({
       where: { dayId_placeId: { dayId, placeId } },
-      create: { dayId, placeId, sortOrder: count, stayMinutes },
-      update: { stayMinutes },
       include: { place: true },
     });
   }
@@ -114,6 +123,15 @@ export class ItineraryService {
   ) {
     await this.requireDay(user, tripId, dayId);
     await this.prisma.tripDayPlace.deleteMany({ where: { dayId, placeId } });
+    const remaining = await this.prisma.tripDayPlace.count({
+      where: { placeId },
+    });
+    if (remaining === 0) {
+      await this.prisma.tripPlace.update({
+        where: { id: placeId },
+        data: { allowReuse: false },
+      });
+    }
     return { ok: true };
   }
 

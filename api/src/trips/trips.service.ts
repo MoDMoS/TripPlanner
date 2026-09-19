@@ -6,7 +6,7 @@ import {
 import type { AuthUser } from '../auth/auth-user.type';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
-import type { AddTripPlaceDto, CreateTripDto, UpdateTripDto } from './dto/trips.dto';
+import type { AddTripPlaceDto, CreateTripDto, UpdateTripDto, UpdateTripPlaceDto } from './dto/trips.dto';
 import { isDuplicatePlace } from './place-duplicate';
 
 @Injectable()
@@ -87,6 +87,37 @@ export class TripsService {
         sourceUrl: dto.sourceUrl,
         category: dto.category,
         notes: dto.notes,
+      },
+    });
+  }
+
+  async updatePlace(
+    user: AuthUser,
+    tripId: string,
+    placeId: string,
+    dto: UpdateTripPlaceDto,
+  ) {
+    await this.get(user, tripId);
+    const place = await this.prisma.tripPlace.findFirst({
+      where: { id: placeId, tripId },
+    });
+    if (!place) throw new NotFoundException('ไม่พบสถานที่');
+
+    if (dto.allowReuse === false) {
+      const onDays = await this.prisma.tripDayPlace.count({
+        where: { placeId },
+      });
+      if (onDays > 0) {
+        throw new BadRequestException(
+          'ย้ายกลับ「ใช้ครั้งเดียว」ได้เมื่อไม่มีวันใดใช้สถานที่นี้',
+        );
+      }
+    }
+
+    return this.prisma.tripPlace.update({
+      where: { id: placeId },
+      data: {
+        allowReuse: dto.allowReuse,
       },
     });
   }
