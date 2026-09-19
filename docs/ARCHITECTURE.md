@@ -43,7 +43,7 @@ places, itinerary days and ordering, route legs, and place/route caches.
 | `routing` | OSRM matrix abstraction + `RouteCache` |
 | `export` | `.docx` via `docx` (optional MapLibre canvas PNG) |
 
-Wizard steps: Places → Days (reusable on top / once-only pools, DnD + collapse; `TripPlace.allowReuse`) → Schedule → Preview → Export.
+Wizard steps: Places → Days (reusable on top / once-only pools; drag-only reusable; same place may appear multiple times per day) → Schedule → Preview → Export.
 
 ## Zero-cost external services (Phase 1)
 

@@ -56,10 +56,11 @@ export class ItineraryService {
     placeIds: string[],
   ) {
     await this.requireDay(user, tripId, dayId);
+    const uniqueIds = [...new Set(placeIds)];
     const places = await this.prisma.tripPlace.findMany({
-      where: { tripId, id: { in: placeIds } },
+      where: { tripId, id: { in: uniqueIds } },
     });
-    if (places.length !== placeIds.length) {
+    if (places.length !== uniqueIds.length) {
       throw new BadRequestException('placeIds ต้องอยู่ในทริปนี้ทั้งหมด');
     }
 
@@ -98,37 +99,38 @@ export class ItineraryService {
     if (!place) throw new NotFoundException('ไม่พบสถานที่');
 
     const count = await this.prisma.tripDayPlace.count({ where: { dayId } });
-    await this.prisma.$transaction([
+    const [, row] = await this.prisma.$transaction([
       this.prisma.tripPlace.update({
         where: { id: placeId },
         data: { allowReuse: true },
       }),
-      this.prisma.tripDayPlace.upsert({
-        where: { dayId_placeId: { dayId, placeId } },
-        create: { dayId, placeId, sortOrder: count, stayMinutes },
-        update: { stayMinutes },
+      this.prisma.tripDayPlace.create({
+        data: { dayId, placeId, sortOrder: count, stayMinutes },
+        include: { place: true },
       }),
     ]);
-    return this.prisma.tripDayPlace.findUniqueOrThrow({
-      where: { dayId_placeId: { dayId, placeId } },
-      include: { place: true },
-    });
+    return row;
   }
 
   async removePlaceFromDay(
     user: AuthUser,
     tripId: string,
     dayId: string,
-    placeId: string,
+    dayPlaceId: string,
   ) {
     await this.requireDay(user, tripId, dayId);
-    await this.prisma.tripDayPlace.deleteMany({ where: { dayId, placeId } });
+    const row = await this.prisma.tripDayPlace.findFirst({
+      where: { id: dayPlaceId, dayId },
+    });
+    if (!row) throw new NotFoundException('ไม่พบสถานที่ในวันนี้');
+
+    await this.prisma.tripDayPlace.delete({ where: { id: row.id } });
     const remaining = await this.prisma.tripDayPlace.count({
-      where: { placeId },
+      where: { placeId: row.placeId },
     });
     if (remaining === 0) {
       await this.prisma.tripPlace.update({
-        where: { id: placeId },
+        where: { id: row.placeId },
         data: { allowReuse: false },
       });
     }
@@ -147,28 +149,33 @@ export class ItineraryService {
     await this.requireDay(user, tripId, toDayId);
 
     await this.prisma.$transaction(async (tx) => {
-      const existing = await tx.tripDayPlace.findUnique({
-        where: { dayId_placeId: { dayId, placeId } },
+      const existing = await tx.tripDayPlace.findFirst({
+        where: { dayId, placeId },
+        orderBy: { sortOrder: 'asc' },
       });
-      const stayMinutes = existing?.stayMinutes ?? 60;
-      await tx.tripDayPlace.deleteMany({ where: { placeId } });
+      if (!existing) throw new NotFoundException('ไม่พบสถานที่ในวันนี้');
+      const stayMinutes = existing.stayMinutes;
+      await tx.tripDayPlace.delete({ where: { id: existing.id } });
 
       const target = await tx.tripDayPlace.findMany({
         where: { dayId: toDayId },
         orderBy: { sortOrder: 'asc' },
       });
-      const ids = target.map((t) => t.placeId);
-      const clamped = Math.max(0, Math.min(index, ids.length));
-      ids.splice(clamped, 0, placeId);
+      const rows = target.map((t) => ({
+        placeId: t.placeId,
+        stayMinutes: t.stayMinutes,
+      }));
+      const clamped = Math.max(0, Math.min(index, rows.length));
+      rows.splice(clamped, 0, { placeId, stayMinutes });
 
       await tx.tripDayPlace.deleteMany({ where: { dayId: toDayId } });
-      for (let i = 0; i < ids.length; i += 1) {
+      for (let i = 0; i < rows.length; i += 1) {
         await tx.tripDayPlace.create({
           data: {
             dayId: toDayId,
-            placeId: ids[i],
+            placeId: rows[i].placeId,
             sortOrder: i,
-            stayMinutes: ids[i] === placeId ? stayMinutes : 60,
+            stayMinutes: rows[i].stayMinutes,
           },
         });
       }
@@ -312,7 +319,7 @@ export class ItineraryService {
       startLat?: number;
       startLng?: number;
       transportMode: 'walk' | 'drive' | 'bike' | 'transit';
-      stays: { placeId: string; stayMinutes: number }[];
+      stays: { dayPlaceId?: string; placeId: string; stayMinutes: number }[];
       legs?: {
         toPlaceId: string;
         durationSec: number;
@@ -323,22 +330,40 @@ export class ItineraryService {
   ) {
     const day = await this.loadDayWithPlaces(user, tripId, dayId);
     const ordered = day.places;
-    const stayMap = new Map(dto.stays.map((s) => [s.placeId, s.stayMinutes]));
+    const stayByDayPlace = new Map(
+      dto.stays
+        .filter((s) => s.dayPlaceId)
+        .map((s) => [s.dayPlaceId!, s.stayMinutes] as const),
+    );
+    const stayByPlaceFallback = new Map(
+      dto.stays.map((s) => [s.placeId, s.stayMinutes]),
+    );
 
     for (const row of ordered) {
-      if (!stayMap.has(row.placeId)) {
+      const stay =
+        stayByDayPlace.get(row.id) ?? stayByPlaceFallback.get(row.placeId);
+      if (stay == null) {
         throw new BadRequestException(`ขาด stayMinutes ของ ${row.placeId}`);
       }
     }
 
+    const stayFor = (row: (typeof ordered)[number]) =>
+      stayByDayPlace.get(row.id) ??
+      stayByPlaceFallback.get(row.placeId) ??
+      row.stayMinutes;
+
     let durations: number[] = [];
-    const legMeta = new Map(
+    const legMetaByIndex = new Map(
+      (dto.legs ?? []).map((l, i) => [i, l] as const),
+    );
+    const legMetaByPlace = new Map(
       (dto.legs ?? []).map((l) => [l.toPlaceId, l] as const),
     );
 
     if (dto.transportMode === 'transit') {
-      for (const row of ordered) {
-        const leg = legMeta.get(row.placeId);
+      for (let i = 0; i < ordered.length; i += 1) {
+        const row = ordered[i];
+        const leg = legMetaByIndex.get(i) ?? legMetaByPlace.get(row.placeId);
         if (!leg) {
           throw new BadRequestException(
             'โหมดขนส่งสาธารณะต้องใส่เวลาเดินทางทุกช่วง',
@@ -349,11 +374,13 @@ export class ItineraryService {
     } else {
       // Prefer manual legs when provided; else recalculate
       const allManual =
-        ordered.every((row) => legMeta.get(row.placeId)?.isManualOverride) &&
-        ordered.length > 0;
+        ordered.every((row, i) => {
+          const leg = legMetaByIndex.get(i) ?? legMetaByPlace.get(row.placeId);
+          return leg?.isManualOverride;
+        }) && ordered.length > 0;
       if (allManual || (dto.legs && dto.legs.length === ordered.length)) {
-        durations = ordered.map((row) => {
-          const leg = legMeta.get(row.placeId);
+        durations = ordered.map((row, i) => {
+          const leg = legMetaByIndex.get(i) ?? legMetaByPlace.get(row.placeId);
           if (!leg) {
             throw new BadRequestException('ขาเดินทางไม่ครบ');
           }
@@ -400,7 +427,8 @@ export class ItineraryService {
         durations = durations.slice(0, ordered.length);
         // Apply manual overrides on top
         for (let i = 0; i < ordered.length; i += 1) {
-          const override = legMeta.get(ordered[i].placeId);
+          const override =
+            legMetaByIndex.get(i) ?? legMetaByPlace.get(ordered[i].placeId);
           if (override?.isManualOverride) {
             durations[i] = override.durationSec;
           }
@@ -413,7 +441,7 @@ export class ItineraryService {
       places: ordered.map((row) => ({
         placeId: row.placeId,
         name: row.place.name,
-        stayMinutes: stayMap.get(row.placeId) ?? row.stayMinutes,
+        stayMinutes: stayFor(row),
       })),
       legsDurationSec: durations,
     });
@@ -448,14 +476,15 @@ export class ItineraryService {
       });
       for (const row of ordered) {
         await tx.tripDayPlace.update({
-          where: { dayId_placeId: { dayId, placeId: row.placeId } },
-          data: { stayMinutes: stayMap.get(row.placeId) ?? row.stayMinutes },
+          where: { id: row.id },
+          data: { stayMinutes: stayFor(row) },
         });
       }
       await tx.tripLeg.deleteMany({ where: { dayId } });
       for (let i = 0; i < schedule.legs.length; i += 1) {
         const leg = schedule.legs[i];
-        const override = legMeta.get(leg.toPlaceId);
+        const override =
+          legMetaByIndex.get(i) ?? legMetaByPlace.get(leg.toPlaceId);
         await tx.tripLeg.create({
           data: {
             dayId,
@@ -505,10 +534,9 @@ export class ItineraryService {
 
     for (const day of trip.days ?? []) {
       const ordered = day.places ?? [];
-      const durations = ordered.map((row) => {
-        const leg = (day.legs ?? []).find((l) => l.toPlaceId === row.placeId);
-        return leg?.durationSec ?? 0;
-      });
+      const durations = ordered.map(
+        (_, i) => (day.legs ?? [])[i]?.durationSec ?? 0,
+      );
       const startTime = day.startTime || '09:00';
       const schedule = ordered.length
         ? buildDaySchedule({
@@ -578,7 +606,7 @@ export class ItineraryService {
           orderBy: { sortOrder: 'asc' },
           include: { place: true },
         },
-        legs: true,
+        legs: { orderBy: { createdAt: 'asc' } },
       },
     });
     if (!day) throw new NotFoundException('ไม่พบวันในทริป');

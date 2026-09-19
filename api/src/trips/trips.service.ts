@@ -46,7 +46,7 @@ export class TripsService {
           orderBy: { dayNumber: 'asc' },
           include: {
             places: { orderBy: { sortOrder: 'asc' }, include: { place: true } },
-            legs: true,
+            legs: { orderBy: { createdAt: 'asc' } },
           },
         },
       },

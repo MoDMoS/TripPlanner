@@ -73,27 +73,19 @@ function DraggablePlace({
   days,
   busy,
   onAssign,
+  showDayButtons,
 }: {
   place: TripPlace;
   days: TripDay[];
   busy: boolean;
   onAssign: (dayId: string) => void;
+  showDayButtons: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({ id: `place:${place.id}`, data: { placeId: place.id } });
   const style = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
     : undefined;
-
-  const dayIdsWithPlace = useMemo(() => {
-    const ids = new Set<string>();
-    for (const day of days) {
-      if (day.places?.some((row) => row.placeId === place.id)) ids.add(day.id);
-    }
-    return ids;
-  }, [days, place.id]);
-
-  const targets = days.filter((day) => !dayIdsWithPlace.has(day.id));
 
   return (
     <li
@@ -111,9 +103,9 @@ function DraggablePlace({
       >
         {place.name}
       </button>
-      {targets.length ? (
+      {showDayButtons && days.length ? (
         <div className="mt-1 flex flex-wrap gap-1">
-          {targets.map((day) => (
+          {days.map((day) => (
             <button
               key={day.id}
               type="button"
@@ -125,9 +117,7 @@ function DraggablePlace({
             </button>
           ))}
         </div>
-      ) : (
-        <p className="mt-1 text-xs text-violet-400/70">อยู่ในทุกวันแล้ว</p>
-      )}
+      ) : null}
     </li>
   );
 }
@@ -243,20 +233,20 @@ function DayDropColumn({
         onDragEnd={(event) => onReorder(day.id, event)}
       >
         <SortableContext
-          items={day.places.map((p) => p.placeId)}
+          items={day.places.map((p) => p.id)}
           strategy={verticalListSortingStrategy}
         >
           <ol className="space-y-2">
             {day.places.map((row, index) => (
-              <div key={row.placeId} className="flex items-center gap-2">
+              <div key={row.id} className="flex items-center gap-2">
                 <span className="w-5 text-xs text-violet-400">{index + 1}.</span>
                 <div className="flex-1">
                   <SortableItem
-                    id={row.placeId}
+                    id={row.id}
                     label={row.place.name}
                     onRemove={() =>
                       void api
-                        .removePlaceFromDay(tripId, day.id, row.placeId)
+                        .removePlaceFromDay(tripId, day.id, row.id)
                         .then(onChanged)
                         .catch((err: Error) => setError(err.message))
                     }
@@ -371,11 +361,12 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
     if (!over || active.id === over.id) return;
     const day = days.find((d) => d.id === dayId);
     if (!day) return;
-    const ids = day.places.map((p) => p.placeId);
-    const oldIndex = ids.indexOf(String(active.id));
-    const newIndex = ids.indexOf(String(over.id));
+    const rowIds = day.places.map((p) => p.id);
+    const oldIndex = rowIds.indexOf(String(active.id));
+    const newIndex = rowIds.indexOf(String(over.id));
     if (oldIndex < 0 || newIndex < 0) return;
-    const next = arrayMove(ids, oldIndex, newIndex);
+    const nextRows = arrayMove(day.places, oldIndex, newIndex);
+    const next = nextRows.map((p) => p.placeId);
     setBusy(true);
     try {
       await api.setDayOrder(trip.id, dayId, next);
@@ -428,7 +419,7 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
             <PoolBlock
               id="pool:reusable"
               title="ใช้ซ้ำได้"
-              hint="ลากจาก「ใช้ครั้งเดียว」มาวางที่นี่ หรือใส่วันแล้วจะโผล่เอง"
+              hint="ลากไปวางที่วันได้หลายครั้ง (รวมวันเดียวกัน)"
               open={open.reusable}
               onToggle={() =>
                 setOpen((prev) => ({ ...prev, reusable: !prev.reusable }))
@@ -442,6 +433,7 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
                   place={place}
                   days={days}
                   busy={busy}
+                  showDayButtons={false}
                   onAssign={(dayId) => void assignToDay(place.id, dayId)}
                 />
               ))}
@@ -462,6 +454,7 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
                   place={place}
                   days={days}
                   busy={busy}
+                  showDayButtons
                   onAssign={(dayId) => void assignToDay(place.id, dayId)}
                 />
               ))}

@@ -24,3 +24,4 @@ Split Organize Days **Unassigned** into two pools so a place can be reused acros
 - ลากระหว่างสองบล็อกได้ (`TripPlace.allowReuse`) และลากไปวางที่วันได้
 - ปุ่มเปิด/ปิดแต่ละบล็อก (จำใน `localStorage`)
 - Remove จากวันสุดท้าย → `allowReuse=false` กลับใช้ครั้งเดียว
+- **ใช้ซ้ำได้**: ไม่มีปุ่มเลือกวัน — ลากใส่เท่านั้น · สถานที่เดียวกันใส่ซ้ำในวันเดียวกันได้ (`TripDayPlace` ไม่ unique ต่อ day+place)

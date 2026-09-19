@@ -158,8 +158,8 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ placeId }),
     }),
-  removePlaceFromDay: (tripId: string, dayId: string, placeId: string) =>
-    request<{ ok: true }>(`/trips/${tripId}/days/${dayId}/places/${placeId}`, {
+  removePlaceFromDay: (tripId: string, dayId: string, dayPlaceId: string) =>
+    request<{ ok: true }>(`/trips/${tripId}/days/${dayId}/places/${dayPlaceId}`, {
       method: 'DELETE',
     }),
   calculateDayRoute: (
@@ -205,7 +205,11 @@ export const api = {
       startLat?: number;
       startLng?: number;
       transportMode: 'walk' | 'drive' | 'bike' | 'transit';
-      stays: Array<{ placeId: string; stayMinutes: number }>;
+      stays: Array<{
+        dayPlaceId?: string;
+        placeId: string;
+        stayMinutes: number;
+      }>;
       legs?: Array<{
         toPlaceId: string;
         durationSec: number;

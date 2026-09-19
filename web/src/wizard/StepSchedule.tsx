@@ -45,12 +45,14 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
     const nextLegs: Record<string, number> = {};
     const nextManual: Record<string, boolean> = {};
     for (const row of day.places) {
-      nextStays[row.placeId] = row.stayMinutes;
+      nextStays[row.id] = row.stayMinutes;
     }
-    for (const leg of day.legs ?? []) {
-      if (leg.toPlaceId) {
-        nextLegs[leg.toPlaceId] = Math.round(leg.durationSec / 60);
-        nextManual[leg.toPlaceId] = leg.isManualOverride;
+    for (let i = 0; i < day.places.length; i += 1) {
+      const row = day.places[i];
+      const leg = (day.legs ?? [])[i];
+      if (leg) {
+        nextLegs[row.id] = Math.round(leg.durationSec / 60);
+        nextManual[row.id] = leg.isManualOverride;
       }
     }
     setStays(nextStays);
@@ -76,8 +78,10 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
       }
       if (result.schedule) {
         const next: Record<string, number> = {};
-        for (const leg of result.schedule.legs) {
-          next[leg.toPlaceId] = Math.round(leg.durationSec / 60);
+        for (let i = 0; i < current.places.length; i += 1) {
+          const stop = current.places[i];
+          const leg = result.schedule.legs[i];
+          if (leg) next[stop.id] = Math.round(leg.durationSec / 60);
         }
         setLegMins(next);
         setTimeline(
@@ -104,13 +108,14 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
         startLabel: startLabel || undefined,
         transportMode: mode,
         stays: day.places.map((p) => ({
+          dayPlaceId: p.id,
           placeId: p.placeId,
-          stayMinutes: stays[p.placeId] ?? p.stayMinutes,
+          stayMinutes: stays[p.id] ?? p.stayMinutes,
         })),
         legs: day.places.map((p) => ({
           toPlaceId: p.placeId,
-          durationSec: Math.round((legMins[p.placeId] ?? 0) * 60),
-          isManualOverride: mode === 'transit' || Boolean(manual[p.placeId]),
+          durationSec: Math.round((legMins[p.id] ?? 0) * 60),
+          isManualOverride: mode === 'transit' || Boolean(manual[p.id]),
         })),
         acknowledgeWarnings: acknowledge,
       };
@@ -210,7 +215,7 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
       <section className="space-y-3 rounded-xl border border-violet-500/25 bg-violet-950/40 p-4">
         {day.places.map((row, index) => (
           <div
-            key={row.placeId}
+            key={row.id}
             className="grid gap-2 rounded-lg border border-violet-500/25 p-3 md:grid-cols-3"
           >
             <div>
@@ -223,11 +228,11 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
                 type="number"
                 min={0}
                 className="mt-1 w-full rounded-lg border border-violet-500/30 bg-violet-950/50 px-3 py-2"
-                value={stays[row.placeId] ?? row.stayMinutes}
+                value={stays[row.id] ?? row.stayMinutes}
                 onChange={(e) =>
                   setStays((s) => ({
                     ...s,
-                    [row.placeId]: Number(e.target.value),
+                    [row.id]: Number(e.target.value),
                   }))
                 }
               />
@@ -241,13 +246,13 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
                 type="number"
                 min={0}
                 className="mt-1 w-full rounded-lg border border-violet-500/30 bg-violet-950/50 px-3 py-2"
-                value={legMins[row.placeId] ?? 0}
+                value={legMins[row.id] ?? 0}
                 onChange={(e) => {
                   setLegMins((s) => ({
                     ...s,
-                    [row.placeId]: Number(e.target.value),
+                    [row.id]: Number(e.target.value),
                   }));
-                  setManual((m) => ({ ...m, [row.placeId]: true }));
+                  setManual((m) => ({ ...m, [row.id]: true }));
                 }}
               />
             </label>

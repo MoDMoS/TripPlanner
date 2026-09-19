@@ -1,5 +1,4 @@
 import {
-  ArrayUnique,
   IsArray,
   IsBoolean,
   IsIn,
@@ -29,7 +28,6 @@ export class PatchDayDto {
 
 export class OrderDayDto {
   @IsArray()
-  @ArrayUnique()
   @IsString({ each: true })
   placeIds!: string[];
 }
@@ -56,6 +54,10 @@ export class MovePlaceDto {
 }
 
 export class ScheduleStayDto {
+  @IsOptional()
+  @IsString()
+  dayPlaceId?: string;
+
   @IsString()
   placeId!: string;
 

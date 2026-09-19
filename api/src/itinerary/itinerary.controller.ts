@@ -83,14 +83,14 @@ export class ItineraryController {
     );
   }
 
-  @Delete('days/:dayId/places/:placeId')
+  @Delete('days/:dayId/places/:dayPlaceId')
   removePlace(
     @CurrentUser() user: AuthUser,
     @Param('tripId') tripId: string,
     @Param('dayId') dayId: string,
-    @Param('placeId') placeId: string,
+    @Param('dayPlaceId') dayPlaceId: string,
   ) {
-    return this.itinerary.removePlaceFromDay(user, tripId, dayId, placeId);
+    return this.itinerary.removePlaceFromDay(user, tripId, dayId, dayPlaceId);
   }
 
   @Post('days/:dayId/places/:placeId/move')
