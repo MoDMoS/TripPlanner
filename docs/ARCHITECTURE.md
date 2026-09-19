@@ -1,6 +1,6 @@
 # TripPlanner Architecture
 
-อัปเดต: 2026-08-26
+อัปเดต: 2026-09-20
 
 TripPlanner is a MoDMoS sibling application composed of:
 
@@ -43,7 +43,7 @@ places, itinerary days and ordering, route legs, and place/route caches.
 | `routing` | OSRM matrix abstraction + `RouteCache` |
 | `export` | `.docx` via `docx` (optional MapLibre canvas PNG) |
 
-Wizard steps: Places → Days (once / reusable unassigned pools) → Schedule → Preview → Export.
+Wizard steps: Places → Days (reusable on top / once-only pools, DnD + collapse; `TripPlace.allowReuse`) → Schedule → Preview → Export.
 
 ## Zero-cost external services (Phase 1)
 

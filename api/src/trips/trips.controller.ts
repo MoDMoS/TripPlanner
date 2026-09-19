@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { AuthUser } from '../auth/auth-user.type';
-import { AddTripPlaceDto, CreateTripDto, UpdateTripDto } from './dto/trips.dto';
+import { AddTripPlaceDto, CreateTripDto, UpdateTripDto, UpdateTripPlaceDto } from './dto/trips.dto';
 import { TripsService } from './trips.service';
 
 @Controller('trips')
@@ -47,6 +47,16 @@ export class TripsController {
     @Body() dto: AddTripPlaceDto,
   ) {
     return this.trips.addPlace(user, id, dto);
+  }
+
+  @Patch(':id/places/:placeId')
+  updatePlace(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Param('placeId') placeId: string,
+    @Body() dto: UpdateTripPlaceDto,
+  ) {
+    return this.trips.updatePlace(user, id, placeId, dto);
   }
 
   @Delete(':id/places/:placeId')

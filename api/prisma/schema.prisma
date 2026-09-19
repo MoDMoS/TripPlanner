@@ -45,6 +45,7 @@ model TripPlace {
   sourceUrl String?
   category  String?
   notes     String?
+  allowReuse Boolean       @default(false)
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
   dayPlaces TripDayPlace[]

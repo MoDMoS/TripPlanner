@@ -9,16 +9,18 @@ Split Organize Days **Unassigned** into two pools so a place can be reused acros
 
 ## Behavior
 
-| Pool | Contents | After assign to a day |
-|------|----------|------------------------|
-| **ใช้ครั้งเดียว** | Places not on any day | Leaves this pool; appears in reusable |
-| **ใช้ซ้ำได้** | Places on ≥ 1 day | Can assign to other days that do not already include it |
+| Pool | Contents | Notes |
+|------|----------|--------|
+| **ใช้ซ้ำได้** (บน) | `allowReuse` หรืออยู่บน ≥ 1 วัน | ลากจากครั้งเดียวมาวางได้ · ปุ่มเปิด/ปิด |
+| **ใช้ครั้งเดียว** (ล่าง) | ยังไม่เคยใช้ · `allowReuse=false` | ลากไปซ้ำได้หรือไปวัน · ปุ่มเปิด/ปิด |
 
-- Reusable starts empty.
-- Remove from the last day that uses a place → place returns to **ใช้ครั้งเดียว**.
-- Day buttons hide for days that already have that place.
+- Assign ไปวัน → ตั้ง `allowReuse=true` อัตโนมัติ
+- Remove จากวันสุดท้าย → `allowReuse=false` กลับใช้ครั้งเดียว
+- Day buttons ซ่อนวันที่มีสถานที่นั้นอยู่แล้ว
 
-## Scope
+## Follow-up (2026-09-20 UI)
 
-- UI: `web/src/wizard/StepDays.tsx` only (API already allows same `placeId` on different days via `@@unique([dayId, placeId])`).
-- No full cross-column DnD in this change.
+- **ใช้ซ้ำได้** อยู่ด้านบน · **ใช้ครั้งเดียว** ด้านล่าง
+- ลากระหว่างสองบล็อกได้ (`TripPlace.allowReuse`) และลากไปวางที่วันได้
+- ปุ่มเปิด/ปิดแต่ละบล็อก (จำใน `localStorage`)
+- Remove จากวันสุดท้าย → `allowReuse=false` กลับใช้ครั้งเดียว
