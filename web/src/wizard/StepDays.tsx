@@ -2,10 +2,12 @@ import {
   DndContext,
   PointerSensor,
   closestCenter,
+  pointerWithin,
   useDraggable,
   useDroppable,
   useSensor,
   useSensors,
+  type CollisionDetection,
   type DragEndEvent,
 } from '@dnd-kit/core';
 import {
@@ -26,6 +28,19 @@ type Props = {
 };
 
 const OPEN_KEY = 'trip-days-pool-open';
+
+const collisionDetection: CollisionDetection = (args) => {
+  const hits = pointerWithin(args);
+  if (hits.length > 0) {
+    const dayHit = hits.find((c) => {
+      const id = String(c.id);
+      return id.startsWith('day:') || id.startsWith('dayplace:');
+    });
+    if (dayHit) return [dayHit];
+    return hits;
+  }
+  return closestCenter(args);
+};
 
 function readOpen() {
   try {
@@ -82,7 +97,7 @@ function DraggablePlace({
   showDayButtons: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({ id: `place:${place.id}`, data: { placeId: place.id } });
+    useDraggable({ id: `place:${place.id}`, data: { type: 'place', placeId: place.id } });
   const style = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
     : undefined;
@@ -141,7 +156,7 @@ function PoolBlock({
   children: ReactNode;
   itemCount: number;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id });
+  const { setNodeRef, isOver } = useDroppable({ id, data: { type: 'pool' } });
 
   return (
     <section
@@ -182,24 +197,20 @@ function PoolBlock({
 
 function DayDropColumn({
   day,
-  sensors,
   tripId,
   busy,
   onChanged,
   setError,
-  onReorder,
 }: {
   day: TripDay;
-  sensors: ReturnType<typeof useSensors>;
   tripId: string;
   busy: boolean;
   onChanged: () => Promise<void>;
   setError: (msg: string | null) => void;
-  onReorder: (dayId: string, event: DragEndEvent) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: `day:${day.id}`,
-    data: { dayId: day.id },
+    data: { type: 'day', dayId: day.id },
   });
 
   return (
@@ -227,41 +238,46 @@ function DayDropColumn({
           Delete
         </button>
       </div>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={(event) => onReorder(day.id, event)}
+      <SortableContext
+        items={day.places.map((p) => `dayplace:${p.id}`)}
+        strategy={verticalListSortingStrategy}
       >
-        <SortableContext
-          items={day.places.map((p) => p.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          <ol className="space-y-2">
-            {day.places.map((row, index) => (
-              <div key={row.id} className="flex items-center gap-2">
-                <span className="w-5 text-xs text-violet-400">{index + 1}.</span>
-                <div className="flex-1">
-                  <SortableItem
-                    id={row.id}
-                    label={row.place.name}
-                    onRemove={() =>
-                      void api
-                        .removePlaceFromDay(tripId, day.id, row.id)
-                        .then(onChanged)
-                        .catch((err: Error) => setError(err.message))
-                    }
-                  />
-                </div>
+        <ol className="min-h-[48px] space-y-2">
+          {day.places.map((row, index) => (
+            <div key={row.id} className="flex items-center gap-2">
+              <span className="w-5 text-xs text-violet-400">{index + 1}.</span>
+              <div className="flex-1">
+                <SortableItem
+                  id={`dayplace:${row.id}`}
+                  label={row.place.name}
+                  onRemove={() =>
+                    void api
+                      .removePlaceFromDay(tripId, day.id, row.id)
+                      .then(onChanged)
+                      .catch((err: Error) => setError(err.message))
+                  }
+                />
               </div>
-            ))}
-          </ol>
-        </SortableContext>
-      </DndContext>
+            </div>
+          ))}
+        </ol>
+      </SortableContext>
       {!day.places.length ? (
         <p className="mt-2 text-xs text-violet-400/70">ลากสถานที่มาวางที่นี่</p>
       ) : null}
     </section>
   );
+}
+
+function resolveDayId(overId: string, days: TripDay[]): string | null {
+  if (overId.startsWith('day:')) return overId.slice(4);
+  if (overId.startsWith('dayplace:')) {
+    const dayPlaceId = overId.slice('dayplace:'.length);
+    for (const day of days) {
+      if (day.places.some((row) => row.id === dayPlaceId)) return day.id;
+    }
+  }
+  return null;
 }
 
 export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
@@ -336,45 +352,60 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
     }
   }
 
-  async function onPoolDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    if (!over) return;
-    const placeId = String(active.id).replace(/^place:/, '');
-    if (!placeId || active.id === over.id) return;
-    const overId = String(over.id);
-
-    if (overId === 'pool:reusable') {
-      await setAllowReuse(placeId, true);
-      return;
-    }
-    if (overId === 'pool:once') {
-      await setAllowReuse(placeId, false);
-      return;
-    }
-    if (overId.startsWith('day:')) {
-      await assignToDay(placeId, overId.slice(4));
-    }
-  }
-
-  async function onDayReorder(dayId: string, event: DragEndEvent) {
+  async function onDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const day = days.find((d) => d.id === dayId);
-    if (!day) return;
-    const rowIds = day.places.map((p) => p.id);
-    const oldIndex = rowIds.indexOf(String(active.id));
-    const newIndex = rowIds.indexOf(String(over.id));
-    if (oldIndex < 0 || newIndex < 0) return;
-    const nextRows = arrayMove(day.places, oldIndex, newIndex);
-    const next = nextRows.map((p) => p.placeId);
-    setBusy(true);
-    try {
-      await api.setDayOrder(trip.id, dayId, next);
-      await onChanged();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'reorder failed');
-    } finally {
-      setBusy(false);
+
+    const activeId = String(active.id);
+    const overId = String(over.id);
+
+    if (activeId.startsWith('place:')) {
+      const placeId = activeId.slice('place:'.length);
+
+      if (overId === 'pool:reusable') {
+        await setAllowReuse(placeId, true);
+        return;
+      }
+      if (overId === 'pool:once') {
+        await setAllowReuse(placeId, false);
+        return;
+      }
+
+      const dayId = resolveDayId(overId, days);
+      if (dayId) {
+        await assignToDay(placeId, dayId);
+      }
+      return;
+    }
+
+    if (activeId.startsWith('dayplace:')) {
+      const fromDayPlaceId = activeId.slice('dayplace:'.length);
+      const fromDay = days.find((d) =>
+        d.places.some((row) => row.id === fromDayPlaceId),
+      );
+      if (!fromDay) return;
+
+      const toDayPlaceId = overId.startsWith('dayplace:')
+        ? overId.slice('dayplace:'.length)
+        : null;
+      const toDayId = resolveDayId(overId, days);
+      if (!toDayId || toDayId !== fromDay.id || !toDayPlaceId) return;
+
+      const rowIds = fromDay.places.map((p) => p.id);
+      const oldIndex = rowIds.indexOf(fromDayPlaceId);
+      const newIndex = rowIds.indexOf(toDayPlaceId);
+      if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return;
+
+      const next = arrayMove(fromDay.places, oldIndex, newIndex).map((p) => p.placeId);
+      setBusy(true);
+      try {
+        await api.setDayOrder(trip.id, fromDay.id, next);
+        await onChanged();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'reorder failed');
+      } finally {
+        setBusy(false);
+      }
     }
   }
 
@@ -411,8 +442,8 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
 
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={(event) => void onPoolDragEnd(event)}
+        collisionDetection={collisionDetection}
+        onDragEnd={(event) => void onDragEnd(event)}
       >
         <div className="grid gap-4 lg:grid-cols-[280px_repeat(auto-fit,minmax(220px,1fr))]">
           <div className="space-y-4">
@@ -465,12 +496,10 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
             <DayDropColumn
               key={day.id}
               day={day}
-              sensors={sensors}
               tripId={trip.id}
               busy={busy}
               onChanged={onChanged}
               setError={setError}
-              onReorder={(dayId, event) => void onDayReorder(dayId, event)}
             />
           ))}
         </div>
