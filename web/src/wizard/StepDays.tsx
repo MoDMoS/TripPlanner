@@ -106,13 +106,13 @@ function DraggablePlace({
     <li
       ref={setNodeRef}
       style={style}
-      className={`rounded-lg border border-violet-500/25 bg-violet-950/50 p-2 ${
+      className={`w-[min(100%,11rem)] shrink-0 rounded-lg border border-violet-500/25 bg-violet-950/50 p-2 ${
         isDragging ? 'opacity-60 ring-1 ring-violet-400' : ''
       }`}
     >
       <button
         type="button"
-        className="w-full cursor-grab text-left font-medium active:cursor-grabbing"
+        className="w-full cursor-grab text-left text-sm font-medium active:cursor-grabbing"
         {...attributes}
         {...listeners}
       >
@@ -184,9 +184,11 @@ function PoolBlock({
         </button>
       </div>
       {open ? (
-        <ul className="mt-3 min-h-[48px] space-y-2 text-sm">
+        <ul className="mt-3 flex min-h-[48px] flex-wrap gap-2 text-sm">
           {children}
-          {!itemCount ? <li className="text-xs text-violet-400">{emptyText}</li> : null}
+          {!itemCount ? (
+            <li className="text-xs text-violet-400">{emptyText}</li>
+          ) : null}
         </ul>
       ) : (
         <p className="mt-2 text-xs text-violet-400/60">ย่อไว้ · {itemCount} รายการ</p>
@@ -445,8 +447,8 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
         collisionDetection={collisionDetection}
         onDragEnd={(event) => void onDragEnd(event)}
       >
-        <div className="grid gap-4 lg:grid-cols-[280px_repeat(auto-fit,minmax(220px,1fr))]">
-          <div className="space-y-4">
+        <div className="space-y-4">
+          <div className="grid gap-3 md:grid-cols-2">
             <PoolBlock
               id="pool:reusable"
               title="ใช้ซ้ำได้"
@@ -492,16 +494,19 @@ export function StepDays({ trip, onChanged, onBack, onContinue }: Props) {
             </PoolBlock>
           </div>
 
-          {days.map((day) => (
-            <DayDropColumn
-              key={day.id}
-              day={day}
-              tripId={trip.id}
-              busy={busy}
-              onChanged={onChanged}
-              setError={setError}
-            />
-          ))}
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {days.map((day) => (
+              <div key={day.id} className="w-[min(100%,240px)] shrink-0">
+                <DayDropColumn
+                  day={day}
+                  tripId={trip.id}
+                  busy={busy}
+                  onChanged={onChanged}
+                  setError={setError}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </DndContext>
     </div>

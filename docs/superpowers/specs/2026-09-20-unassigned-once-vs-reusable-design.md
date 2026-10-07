@@ -1,6 +1,6 @@
 # Step 2 — Unassigned: once vs reusable
 
-อัปเดต: 2026-09-20  
+อัปเดต: 2026-10-08  
 Status: Implemented
 
 ## Goal
@@ -25,3 +25,4 @@ Split Organize Days **Unassigned** into two pools so a place can be reused acros
 - ปุ่มเปิด/ปิดแต่ละบล็อก (จำใน `localStorage`)
 - Remove จากวันสุดท้าย → `allowReuse=false` กลับใช้ครั้งเดียว
 - **ใช้ซ้ำได้**: ไม่มีปุ่มเลือกวัน — ลากใส่เท่านั้น · สถานที่เดียวกันใส่ซ้ำในวันเดียวกันได้ (`TripDayPlace` ไม่ unique ต่อ day+place)
+- Layout: สองบล็อก pool อยู่**ข้างบน** (คู่กันแนวนอน) · คอลัมน์วันอยู่ล่างเลื่อนแนวนอน · เปิดบล็อกแล้วรายการเป็นแถวแนวนอน wrap
