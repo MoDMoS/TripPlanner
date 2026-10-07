@@ -27,4 +27,4 @@ Completely white map: OpenFreeMap **vector** planet tiles often fail in-browser 
 
 ## Follow-up (2026-10-08)
 
-Carto raster/vector both show watermark **API KEY REQUIRED** without a key. Switched `TripMap` to **Maptoolkit Street** (`https://styles.maptoolkit.org/street.json`) — no API key. Optional override: `VITE_MAP_STYLE_URL`.
+Carto shows **API KEY REQUIRED**. Maptoolkit Street style loads but vector tiles **500** for Bangkok → near-white blank map. Switched to **Esri World Street Map** raster (`…/World_Street_Map/MapServer/tile/{z}/{y}/{x}`), no API key. Optional `VITE_MAP_STYLE_URL`.

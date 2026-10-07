@@ -5,19 +5,37 @@ import {
   Marker,
   NavigationControl,
   Popup,
+  type StyleSpecification,
 } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { TripPlace } from '../api';
 
 /**
- * Basemap: Maptoolkit Street (OSM vector, no API key).
- * Carto Voyager raster/vector now watermarks "API KEY REQUIRED" without a key.
- * Override with VITE_MAP_STYLE_URL if needed.
+ * Basemap: Esri World Street Map raster (no API key).
+ * Carto → "API KEY REQUIRED". Maptoolkit Street style loads but its MVT
+ * tiles 500 for SE Asia → blank near-white canvas. Override with
+ * VITE_MAP_STYLE_URL (MapLibre style URL) if needed.
  */
-function mapStyleUrl(): string {
+function mapStyle(): string | StyleSpecification {
   const override = (import.meta.env.VITE_MAP_STYLE_URL as string | undefined)?.trim();
   if (override) return override;
-  return 'https://styles.maptoolkit.org/street.json';
+
+  return {
+    version: 8,
+    sources: {
+      esri: {
+        type: 'raster',
+        tiles: [
+          'https://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+        ],
+        tileSize: 256,
+        maxzoom: 19,
+        attribution:
+          'Tiles &copy; <a href="https://www.esri.com/">Esri</a>',
+      },
+    },
+    layers: [{ id: 'esri', type: 'raster', source: 'esri' }],
+  };
 }
 
 /** Beyond this span (~90 km), fitBounds becomes unreadable — zoom to a city instead. */
@@ -131,7 +149,7 @@ export function TripMap({ places, focus, onSelectPlace, mapRef }: Props) {
     let cancelled = false;
     const map = new Map({
       container: containerRef.current,
-      style: mapStyleUrl(),
+      style: mapStyle(),
       center: [100.5018, 13.7563],
       zoom: 11,
       // Needed for DOCX canvas capture
