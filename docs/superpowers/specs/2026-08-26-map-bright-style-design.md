@@ -27,4 +27,4 @@ Completely white map: OpenFreeMap **vector** planet tiles often fail in-browser 
 
 ## Follow-up (2026-10-08)
 
-Carto **raster** tiles now show watermark **API KEY REQUIRED** without a free key. Switched `TripMap` to Carto Voyager **MapLibre vector** style (`…/gl/voyager-gl-style/style.json`). Optional `VITE_CARTO_API_KEY` (from https://carto.com/basemaps/apikey/) appended as `?key=` when set.
+Carto raster/vector both show watermark **API KEY REQUIRED** without a key. Switched `TripMap` to **Maptoolkit Street** (`https://styles.maptoolkit.org/street.json`) — no API key. Optional override: `VITE_MAP_STYLE_URL`.

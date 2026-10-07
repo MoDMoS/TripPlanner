@@ -49,7 +49,7 @@ Wizard steps: Places → Days (reusable on top / once-only pools; drag-only reus
 
 | Need | Provider |
 |------|----------|
-| Map tiles | Carto Voyager **vector** style via MapLibre (`TripMap`) — raster PNG now requires CARTO API key (watermark “API KEY REQUIRED”); optional `VITE_CARTO_API_KEY` |
+| Map tiles | Maptoolkit Street vector via MapLibre (`TripMap`, no API key) — Carto dropped (watermark “API KEY REQUIRED”); optional `VITE_MAP_STYLE_URL` |
 | Name search | Photon |
 | Reverse geocode | Nominatim (≤ 1 req/s queue, never on keystroke path) |
 | Routing walk/drive/bike | FOSSGIS OSRM |

@@ -10,15 +10,14 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import type { TripPlace } from '../api';
 
 /**
- * Carto Voyager basemap.
- * Raster PNG tiles now watermark "API KEY REQUIRED" without a key
- * (see https://carto.com/basemaps/apikey/). Prefer their MapLibre vector
- * style (still usable without a key today); append VITE_CARTO_API_KEY when set.
+ * Basemap: Maptoolkit Street (OSM vector, no API key).
+ * Carto Voyager raster/vector now watermarks "API KEY REQUIRED" without a key.
+ * Override with VITE_MAP_STYLE_URL if needed.
  */
-function cartoStyle(): string {
-  const key = (import.meta.env.VITE_CARTO_API_KEY as string | undefined)?.trim();
-  const keyQ = key ? `?key=${encodeURIComponent(key)}` : '';
-  return `https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json${keyQ}`;
+function mapStyleUrl(): string {
+  const override = (import.meta.env.VITE_MAP_STYLE_URL as string | undefined)?.trim();
+  if (override) return override;
+  return 'https://styles.maptoolkit.org/street.json';
 }
 
 /** Beyond this span (~90 km), fitBounds becomes unreadable — zoom to a city instead. */
@@ -132,7 +131,7 @@ export function TripMap({ places, focus, onSelectPlace, mapRef }: Props) {
     let cancelled = false;
     const map = new Map({
       container: containerRef.current,
-      style: cartoStyle(),
+      style: mapStyleUrl(),
       center: [100.5018, 13.7563],
       zoom: 11,
       // Needed for DOCX canvas capture
