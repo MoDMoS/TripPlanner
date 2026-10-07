@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, type Trip, type TripDay } from '../api';
+import { estimateStops } from './scheduleEstimate';
 
 type Mode = 'walk' | 'drive' | 'bike' | 'transit';
 
@@ -35,6 +36,15 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [timeline, setTimeline] = useState<string | null>(null);
+
+  const stopTimes = useMemo(() => {
+    if (!day?.places.length) return null;
+    return estimateStops({
+      startTime,
+      staysMinutes: day.places.map((p) => stays[p.id] ?? p.stayMinutes),
+      travelMinutes: day.places.map((p) => legMins[p.id] ?? 0),
+    });
+  }, [day, startTime, stays, legMins]);
 
   useEffect(() => {
     if (!day) return;
@@ -213,51 +223,74 @@ export function StepSchedule({ trip, onChanged, onBack, onContinue }: Props) {
       </section>
 
       <section className="space-y-3 rounded-xl border border-violet-500/25 bg-violet-950/40 p-4">
-        {day.places.map((row, index) => (
-          <div
-            key={row.id}
-            className="grid gap-2 rounded-lg border border-violet-500/25 p-3 md:grid-cols-3"
-          >
-            <div>
-              <div className="text-xs text-violet-400">Stop {index + 1}</div>
-              <div className="font-medium">{row.place.name}</div>
+        <p className="text-xs text-violet-400/80">
+          เวลาประมาณอัปเดตตาม Start time · Travel · Stay (ยังไม่ต้องกด Calculate)
+        </p>
+        {day.places.map((row, index) => {
+          const est = stopTimes?.[index];
+          return (
+            <div
+              key={row.id}
+              className="grid gap-2 rounded-lg border border-violet-500/25 p-3 md:grid-cols-3"
+            >
+              <div>
+                <div className="text-xs text-violet-400">Stop {index + 1}</div>
+                <div className="font-medium">{row.place.name}</div>
+                {est ? (
+                  <p className="mt-1 text-sm text-violet-200">
+                    ประมาณ{' '}
+                    <span className="font-semibold text-violet-100">
+                      {est.arrive}–{est.depart}
+                    </span>
+                    {est.travelMinutes > 0 ? (
+                      <span className="ml-1 text-xs text-violet-400">
+                        (เดินทาง {est.travelMinutes} นาที)
+                      </span>
+                    ) : null}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-amber-300/80">
+                    ใส่ Start time เป็น HH:MM เพื่อดูเวลาประมาณ
+                  </p>
+                )}
+              </div>
+              <label className="text-sm">
+                Stay (min)
+                <input
+                  type="number"
+                  min={0}
+                  className="mt-1 w-full rounded-lg border border-violet-500/30 bg-violet-950/50 px-3 py-2"
+                  value={stays[row.id] ?? row.stayMinutes}
+                  onChange={(e) =>
+                    setStays((s) => ({
+                      ...s,
+                      [row.id]: Number(e.target.value),
+                    }))
+                  }
+                />
+              </label>
+              <label className="text-sm">
+                Travel to here (min)
+                {mode === 'transit' ? (
+                  <span className="ml-1 text-xs text-amber-300">required</span>
+                ) : null}
+                <input
+                  type="number"
+                  min={0}
+                  className="mt-1 w-full rounded-lg border border-violet-500/30 bg-violet-950/50 px-3 py-2"
+                  value={legMins[row.id] ?? 0}
+                  onChange={(e) => {
+                    setLegMins((s) => ({
+                      ...s,
+                      [row.id]: Number(e.target.value),
+                    }));
+                    setManual((m) => ({ ...m, [row.id]: true }));
+                  }}
+                />
+              </label>
             </div>
-            <label className="text-sm">
-              Stay (min)
-              <input
-                type="number"
-                min={0}
-                className="mt-1 w-full rounded-lg border border-violet-500/30 bg-violet-950/50 px-3 py-2"
-                value={stays[row.id] ?? row.stayMinutes}
-                onChange={(e) =>
-                  setStays((s) => ({
-                    ...s,
-                    [row.id]: Number(e.target.value),
-                  }))
-                }
-              />
-            </label>
-            <label className="text-sm">
-              Travel to here (min)
-              {mode === 'transit' ? (
-                <span className="ml-1 text-xs text-amber-300">required</span>
-              ) : null}
-              <input
-                type="number"
-                min={0}
-                className="mt-1 w-full rounded-lg border border-violet-500/30 bg-violet-950/50 px-3 py-2"
-                value={legMins[row.id] ?? 0}
-                onChange={(e) => {
-                  setLegMins((s) => ({
-                    ...s,
-                    [row.id]: Number(e.target.value),
-                  }));
-                  setManual((m) => ({ ...m, [row.id]: true }));
-                }}
-              />
-            </label>
-          </div>
-        ))}
+          );
+        })}
       </section>
 
       <div className="flex flex-wrap gap-2">
