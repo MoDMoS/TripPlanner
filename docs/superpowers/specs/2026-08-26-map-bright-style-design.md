@@ -1,6 +1,6 @@
 # TripPlanner map basemap → OpenFreeMap Bright
 
-อัปเดต: 2026-08-26  
+อัปเดต: 2026-10-08  
 Status: Implemented
 
 ## Goal
@@ -24,3 +24,7 @@ Switch MapLibre style URL from Liberty to Bright:
 Blank-looking map with Taipei + Bangkok pins was caused by `fitBounds` zooming to continental scale (~z4–5), where Bright shows almost no roads. Fix: if place span &gt; ~0.8°, fly to the latest place at city zoom instead of fitting all; show a Focus hint.
 
 Completely white map: OpenFreeMap **vector** planet tiles often fail in-browser → only style background `#f8f4f0`. Switched basemap to **Carto Voyager raster** (still OSM-derived, $0, closer to light Google Maps).
+
+## Follow-up (2026-10-08)
+
+Carto **raster** tiles now show watermark **API KEY REQUIRED** without a free key. Switched `TripMap` to Carto Voyager **MapLibre vector** style (`…/gl/voyager-gl-style/style.json`). Optional `VITE_CARTO_API_KEY` (from https://carto.com/basemaps/apikey/) appended as `?key=` when set.

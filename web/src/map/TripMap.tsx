@@ -5,32 +5,21 @@ import {
   Marker,
   NavigationControl,
   Popup,
-  type StyleSpecification,
 } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { TripPlace } from '../api';
 
 /**
- * Raster basemap (Carto Voyager) — closer to light Google Maps and more reliable
- * than OpenFreeMap vector styles when planet tiles fail (blank cream canvas).
+ * Carto Voyager basemap.
+ * Raster PNG tiles now watermark "API KEY REQUIRED" without a key
+ * (see https://carto.com/basemaps/apikey/). Prefer their MapLibre vector
+ * style (still usable without a key today); append VITE_CARTO_API_KEY when set.
  */
-const MAP_STYLE: StyleSpecification = {
-  version: 8,
-  sources: {
-    carto: {
-      type: 'raster',
-      tiles: [
-        'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
-        'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
-        'https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
-      ],
-      tileSize: 256,
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-    },
-  },
-  layers: [{ id: 'carto', type: 'raster', source: 'carto' }],
-};
+function cartoStyle(): string {
+  const key = (import.meta.env.VITE_CARTO_API_KEY as string | undefined)?.trim();
+  const keyQ = key ? `?key=${encodeURIComponent(key)}` : '';
+  return `https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json${keyQ}`;
+}
 
 /** Beyond this span (~90 km), fitBounds becomes unreadable — zoom to a city instead. */
 const MAX_FIT_SPAN_DEG = 0.8;
@@ -143,7 +132,7 @@ export function TripMap({ places, focus, onSelectPlace, mapRef }: Props) {
     let cancelled = false;
     const map = new Map({
       container: containerRef.current,
-      style: MAP_STYLE,
+      style: cartoStyle(),
       center: [100.5018, 13.7563],
       zoom: 11,
       // Needed for DOCX canvas capture
